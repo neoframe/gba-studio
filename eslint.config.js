@@ -4,7 +4,7 @@ import pooolint from '@poool/eslint-config';
 export default defineConfig(
   {
     ignores: [
-      'node_modules', 'dist', '.yarn', '.dev', 'build',
+      'node_modules', 'dist', '.yarn', '.dev', 'build', '.vite',
     ],
   },
   {
