@@ -1346,13 +1346,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@junipero/tailwind-plugin@npm:3.12.0":
-  version: 3.12.0
-  resolution: "@junipero/tailwind-plugin@npm:3.12.0"
+"@junipero/tailwind-plugin@npm:3.12.2":
+  version: 3.12.2
+  resolution: "@junipero/tailwind-plugin@npm:3.12.2"
   peerDependencies:
     "@junipero/core": ^3.0.0
     tailwindcss: ^3.0.0
-  checksum: 10c0/65baa7ca93bda27c5dc42f516a5dc5594ad7cef85a3f9337c07177902b88c1505be5b0de3afef6f57fa7a1eb3462c66451c43edbe3fe06edbca394abf792f97a
+  checksum: 10c0/5d6d4d3c636dcfcfdc9d9635bf42542337b641cf6e9d6300c7a67b52d4e4bda5c70ae738c08df8a95845646c3d0b39b1a6847be84587b0079f421521383db911
   languageName: node
   linkType: hard
 
@@ -5670,7 +5670,7 @@ __metadata:
     "@electron-forge/plugin-vite": "npm:7.9.0"
     "@electron/fuses": "npm:2.0.0"
     "@junipero/react": "npm:3.12.1"
-    "@junipero/tailwind-plugin": "npm:3.12.0"
+    "@junipero/tailwind-plugin": "npm:3.12.2"
     "@junipero/theme": "npm:3.12.0"
     "@poool/eslint-config": "npm:5.0.6"
     "@radix-ui/themes": "npm:3.2.1"

@@ -3,7 +3,12 @@ import { Theme } from '@radix-ui/themes';
 import { type MoveableState, mockState } from '@junipero/react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import type { GameProject, GameScene, GameVariables } from '../types';
+import type {
+  AppPayload,
+  GameProject,
+  GameScene,
+  GameVariables,
+} from '../types';
 import { type AppContextType, AppContext } from '../contexts';
 import { useQuery } from '../hooks';
 import Canvas from '../Canvas';
@@ -14,6 +19,8 @@ export interface AppState {
   theme: string;
   scenes: GameScene[];
   variables: GameVariables[];
+  history: AppPayload[];
+  historyIndex: number;
   loading: boolean;
   ready: boolean;
   dirty: boolean;
@@ -31,6 +38,8 @@ const App = () => {
     variables: [],
     project: undefined,
     dirty: false,
+    history: [],
+    historyIndex: 0,
   });
 
   useLayoutEffect(() => {
@@ -76,6 +85,50 @@ const App = () => {
     }
   }, [state.dirty, save]);
 
+  const undo = useCallback(() => {
+    if (state.history.length === 0 || state.historyIndex < 0) {
+      return;
+    }
+
+    const past = state.history[state.history.length - 1 - state.historyIndex];
+
+    if (past) {
+      dispatch({
+        ...past,
+        historyIndex: state.historyIndex + 1,
+        dirty: true,
+      });
+    }
+  }, [state.history, state.historyIndex]);
+
+  useHotkeys('mod+z', () => {
+    undo();
+  }, [undo], {
+    preventDefault: true,
+    eventListenerOptions: { capture: true },
+  });
+
+  const redo = useCallback(() => {
+    if (state.historyIndex <= 0) {
+      return;
+    }
+
+    const future = state.history[state.history.length - state.historyIndex + 1];
+
+    if (future) {
+      dispatch({
+        ...future,
+        historyIndex: state.historyIndex - 1,
+        dirty: true,
+      });
+    }
+  }, [state.history, state.historyIndex]);
+
+  useHotkeys('mod+shift+z', e => {
+    e.preventDefault();
+    redo();
+  }, [redo]);
+
   const onMoveScene = useCallback((scene: GameScene, e: MoveableState) => {
     dispatch(s => {
       const foundScene = s.project?.scenes
@@ -92,6 +145,14 @@ const App = () => {
           y: Math.round(e.deltaY || 0),
         });
       }
+
+      s.history = ([] as AppPayload[])
+        .concat((s.history || []).slice(-49))
+        .concat({
+          project: s.project!,
+          scenes: s.scenes,
+          variables: s.variables,
+        });
 
       return { ...s, dirty: true };
     });

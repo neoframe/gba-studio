@@ -42,6 +42,18 @@ const Scene = ({
     `project://graphics/${scene.background}.bmp`
   ) : '', [projectBase, scene]);
 
+  const collisions = useMemo(() => (
+    scene.map?.collisions?.map(line => line.split(','))
+  ), [scene]);
+
+  const sensors = useMemo(() => (
+    scene.map?.sensors || []
+  ), [scene]);
+
+  const gridSize = useMemo(() => (
+    scene.map?.gridSize || 16
+  ), [scene]);
+
   const onSelect_ = useCallback((e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -69,7 +81,8 @@ const Scene = ({
       >
         <Card
           className={classNames(
-            'bg-cover bg-center transition-[outline-width] duration-200',
+            '!relative bg-cover bg-center transition-[outline-width]',
+            'duration-200',
             { '!outline-4 !outline-(--accent-9)': selected === scene },
             className
           )}
@@ -83,6 +96,38 @@ const Scene = ({
               (scene.map?.height || 0) * (scene.map?.gridSize || 16)),
           }}
         >
+          { collisions?.map((line, y) => (
+            line.map((cell, x) => (
+              cell === '1' && (
+                <div
+                  key={`${x}-${y}`}
+                  className="absolute bg-red-500/50 pointer-events-none"
+                  style={{
+                    left: x * gridSize,
+                    top: y * gridSize,
+                    width: gridSize,
+                    height: gridSize,
+                  }}
+                />
+              )
+            ))
+          )) }
+
+          { sensors.map((sensor, i) => (
+            <div
+              key={i}
+              className={classNames(
+                'absolute bg-orange-500/50 pointer-events-none border-2',
+                'border-orange-500'
+              )}
+              style={{
+                left: (sensor.x || 0) * gridSize,
+                top: (sensor.y || 0) * gridSize,
+                width: (sensor.width || 1) * gridSize,
+                height: (sensor.height || 1) * gridSize,
+              }}
+            />
+          )) }
         </Card>
         <span className="absolute block w-full left-0 bottom-full text-center">
           { scene.name }
