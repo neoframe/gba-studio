@@ -14,6 +14,8 @@ import {
 } from 'electron';
 import started from 'electron-squirrel-startup';
 
+import type { AppPayload, GameProject, GameScene, GameVariables } from './types';
+
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 if (started) {
@@ -144,44 +146,136 @@ ipcMain.handle('open-file-dialog', async () => {
   }
 });
 
-ipcMain.handle('load-scenes', async (event, projectPath: string) => {
+const getDataFiles = async (
+  base: string,
+  cond: (file: string) => boolean = () => true
+) => {
+  return (await fs
+    .readdir(path.join(base, 'data')))
+    .filter(file => cond(file));
+};
+
+ipcMain.handle('load-project', async (event, projectPath: string) => {
   const projectDir = path.dirname(projectPath);
 
   const win = BrowserWindow.fromWebContents(event.sender);
   win?.setProgressBar(0);
 
-  const sceneFiles = (await fs
-    .readdir(path.join(projectDir, 'data')))
-    .filter(file => (
+  let current = 0;
+  let total = 1;
+
+  // Load project config
+  const project: GameProject = JSON.parse(await fs
+    .readFile(projectPath, 'utf-8'));
+  current++;
+  win?.setProgressBar(current / total);
+
+  // Prepare variables
+  const variableFiles = await getDataFiles(
+    projectDir,
+    file =>
+      file.startsWith('variables_') &&
+      file.endsWith('.json') &&
+      file !== 'variables_default.json'
+  );
+  total += variableFiles.length;
+
+  // Prepare scenes
+  const sceneFiles = await getDataFiles(
+    projectDir,
+    file =>
       file.startsWith('scene_') &&
       file.endsWith('.json') &&
       !file.endsWith('.map.json') &&
       file !== 'scene_default.json'
-    ));
-  const total = sceneFiles.length;
-  let current = 0;
+  );
+  total += sceneFiles.length;
 
-  const res = [];
+  // Load variables
+  const variables: GameVariables[] = [];
+
+  for (const file of variableFiles) {
+    const registry = JSON
+      .parse(await fs.readFile(path.join(projectDir, 'data', file), 'utf-8'));
+    variables.push({ _file: file, values: registry });
+  }
+
+  current++;
+  win?.setProgressBar(current / total);
+
+  // Load scenes
+  const scenes: GameScene[] = [];
 
   for (const file of sceneFiles) {
-    const content = JSON.parse(await fs
+    const scene: GameScene = JSON.parse(await fs
       .readFile(path.join(projectDir, 'data', file), 'utf-8'));
 
+    scene._file = file;
+
+    // Eventually load map
     try {
       const mapFile = file.replace('.json', '.map.json');
       await fs.access(path.join(projectDir, 'data', mapFile));
-      content.map = JSON.parse(await fs
+
+      scene.map = JSON.parse(await fs
         .readFile(path.join(projectDir, 'data', mapFile), 'utf-8'));
-    } catch {
-      // No map found
-    }
+      scene.map!._file = mapFile;
+    } catch {}
 
     current++;
     win?.setProgressBar(current / total);
-    res.push(content);
+    scenes.push(scene);
   }
 
   win?.setProgressBar(-1);
 
-  return res;
+  return {
+    project,
+    scenes,
+    variables,
+  } as AppPayload;
+});
+
+ipcMain.handle('save-project', async (
+  _,
+  projectPath: string,
+  data: AppPayload
+) => {
+  const projectDir = path.dirname(projectPath);
+
+  // Save project config
+  await fs.writeFile(projectPath,
+    JSON.stringify(data.project || {}, null, 2) + '\n', 'utf-8');
+
+  // Save variables
+  for (const variableSet of data.variables || []) {
+    if (variableSet._file) {
+      const fileName = variableSet._file;
+      delete variableSet._file;
+
+      await fs.writeFile(path.join(projectDir, 'data', fileName),
+        JSON.stringify(variableSet.values, null, 2) + '\n', 'utf-8');
+    }
+  }
+
+  // Save scenes
+  for (const scene of data.scenes || []) {
+    if (scene.map?._file) {
+      const fileName = scene.map._file;
+      delete scene.map._file;
+
+      await fs.writeFile(path.join(projectDir, 'data', fileName),
+        JSON.stringify(scene.map, null, 2) + '\n', 'utf-8');
+
+      delete scene.map;
+    }
+
+    if (scene._file) {
+      const fileName = scene._file;
+      delete scene._file;
+
+      await fs.writeFile(path.join(projectDir, 'data', fileName),
+        JSON.stringify(scene, null, 2) + '\n', 'utf-8');
+    }
+  }
 });

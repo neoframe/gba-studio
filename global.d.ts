@@ -5,7 +5,7 @@
 interface Window {
   electron: {
     openFileDialog: () => Promise<string>;
-    loadScenes: (path: string) => Promise<GameScene[]>;
-    loadMap: (path: string) => Promise<GameMap>;
+    loadProject: (path: string) => Promise<AppPayload>;
+    saveProject: (path: string, payload: AppPayload) => Promise<void>;
   };
 };

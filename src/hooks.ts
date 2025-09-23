@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
-import { AppContext } from './contexts';
+import { AppContext, CanvasContext } from './contexts';
 
 const queryParams = () => {
   const params = new URLSearchParams(window.location.search);
@@ -37,3 +37,4 @@ export const useQuery = <T = Record<string, string>>(init: T = {} as T) => {
 };
 
 export const useApp = () => useContext(AppContext);
+export const useCanvas = () => useContext(CanvasContext);
