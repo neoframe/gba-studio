@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useReducer } from 'react';
 import { Theme } from '@radix-ui/themes';
-import { type MoveableState, mockState } from '@junipero/react';
+import { type MoveableState, cloneDeep, mockState } from '@junipero/react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import type {
@@ -10,7 +10,7 @@ import type {
   GameVariables,
 } from '../types';
 import { type AppContextType, AppContext } from '../contexts';
-import { useQuery } from '../hooks';
+import { useBridgeListener, useQuery } from '../hooks';
 import Canvas from '../Canvas';
 import ProjectSelection from '../ProjectSelection';
 
@@ -54,7 +54,13 @@ const App = () => {
   const init = useCallback(async () => {
     if (projectPath) {
       const data = await window.electron.loadProject(projectPath);
-      dispatch({ ...data, loading: false, ready: true });
+      dispatch({
+        ...data,
+        history: [cloneDeep(data)],
+        historyIndex: 0,
+        loading: false,
+        ready: true,
+      });
     }
   }, [projectPath]);
 
@@ -86,11 +92,12 @@ const App = () => {
   }, [state.dirty, save]);
 
   const undo = useCallback(() => {
-    if (state.history.length === 0 || state.historyIndex < 0) {
+    if (state.history.length === 0 ||
+        state.historyIndex >= state.history.length - 1) {
       return;
     }
 
-    const past = state.history[state.history.length - 1 - state.historyIndex];
+    const past = state.history[state.historyIndex + 1];
 
     if (past) {
       dispatch({
@@ -101,19 +108,16 @@ const App = () => {
     }
   }, [state.history, state.historyIndex]);
 
-  useHotkeys('mod+z', () => {
+  useBridgeListener('undo', () => {
     undo();
-  }, [undo], {
-    preventDefault: true,
-    eventListenerOptions: { capture: true },
-  });
+  }, [undo]);
 
   const redo = useCallback(() => {
     if (state.historyIndex <= 0) {
       return;
     }
 
-    const future = state.history[state.history.length - state.historyIndex + 1];
+    const future = state.history[state.historyIndex - 1];
 
     if (future) {
       dispatch({
@@ -124,10 +128,22 @@ const App = () => {
     }
   }, [state.history, state.historyIndex]);
 
-  useHotkeys('mod+shift+z', e => {
-    e.preventDefault();
+  useBridgeListener('redo', () => {
     redo();
   }, [redo]);
+
+  const addToHistory = useCallback((currentState: AppState) => {
+    const newHistoryEntry: AppPayload = {
+      project: cloneDeep(currentState.project!),
+      scenes: cloneDeep(currentState.scenes),
+      variables: cloneDeep(currentState.variables),
+    };
+
+    const newHistory = currentState.history.slice(currentState.historyIndex);
+    newHistory.unshift(newHistoryEntry);
+
+    return newHistory.slice(0, 50);
+  }, []);
 
   const onMoveScene = useCallback((scene: GameScene, e: MoveableState) => {
     dispatch(s => {
@@ -146,17 +162,9 @@ const App = () => {
         });
       }
 
-      s.history = ([] as AppPayload[])
-        .concat((s.history || []).slice(-49))
-        .concat({
-          project: s.project!,
-          scenes: s.scenes,
-          variables: s.variables,
-        });
-
-      return { ...s, dirty: true };
+      return { ...s, history: addToHistory(s), historyIndex: 0, dirty: true };
     });
-  }, []);
+  }, [addToHistory]);
 
   const getContext = useCallback((): AppContextType => ({
     project: state.project,

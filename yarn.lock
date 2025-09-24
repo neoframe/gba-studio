@@ -1316,33 +1316,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@junipero/core@npm:^3.12.0":
-  version: 3.12.0
-  resolution: "@junipero/core@npm:3.12.0"
-  checksum: 10c0/9092c049ce06d64a465d84be239bf887fa4c5865249854caed546268e62ea52efdf3c35b6c9034d4f1601e889f6ecc1e78509a8446ea0860df4f3f013e80a0a9
+"@junipero/core@npm:^3.12.3":
+  version: 3.12.3
+  resolution: "@junipero/core@npm:3.12.3"
+  checksum: 10c0/33a064e86513fb092ba3014a26c0e47d6f435ce762d7e8d98187eaa11ddfad052b3ac040367b41619bdbd7d399d95d7dd681446d11403629af963430cc4e1e81
   languageName: node
   linkType: hard
 
-"@junipero/hooks@npm:^3.12.0":
-  version: 3.12.0
-  resolution: "@junipero/hooks@npm:3.12.0"
+"@junipero/hooks@npm:^3.12.3":
+  version: 3.12.3
+  resolution: "@junipero/hooks@npm:3.12.3"
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/cc50d54a2efabe4c6f6d581bb26f8aa62949a9069d11a90c46b7d1ce12bfe3bfbb7019db6bff5b39c88dd9d8b04a457417c2fa6672a2c108411156b968e851e4
+  checksum: 10c0/bff11cb6fd41f08989027830361d5ba45fd68572c6376aef3ba1fb2c439e1ef84f8e4e309849ce1ceaf283655547b7eeb554043be9dd2066cf27af4dc69320aa
   languageName: node
   linkType: hard
 
-"@junipero/react@npm:3.12.1":
-  version: 3.12.1
-  resolution: "@junipero/react@npm:3.12.1"
+"@junipero/react@npm:3.12.4":
+  version: 3.12.4
+  resolution: "@junipero/react@npm:3.12.4"
   dependencies:
     "@floating-ui/react": "npm:0.27.16"
-    "@junipero/core": "npm:^3.12.0"
-    "@junipero/hooks": "npm:^3.12.0"
+    "@junipero/core": "npm:^3.12.3"
+    "@junipero/hooks": "npm:^3.12.3"
   peerDependencies:
     react: ^18.0.0 || ^19.0.0
     react-dom: ^18.0.0 || ^19.0.0
-  checksum: 10c0/af66cea0b26443facf4f7a5408875c70c59c2f9b21f6a0d8bb283045ecd6065094660ab9c874d49e95d97e4256c49825b0740dc15602d1160417e4b2e0a5cd47
+  checksum: 10c0/c32e60eb1783d33a05a90980774a2f9d0a933e1ae7fc376556197ba8766d0ce8b5b64388cdb77ee00dddb8716197c52251464d48d7b6bc220a25273872e59f25
   languageName: node
   linkType: hard
 
@@ -1356,10 +1356,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@junipero/theme@npm:3.12.0":
-  version: 3.12.0
-  resolution: "@junipero/theme@npm:3.12.0"
-  checksum: 10c0/a8c138a75b42393b8969833cb83784636f422bceaec366d84f4265ea4d0ebb96b45517bb5e4f92df6efbd4fc423f1a046b32ba55586d10442ddf7477e6d66912
+"@junipero/theme@npm:3.12.3":
+  version: 3.12.3
+  resolution: "@junipero/theme@npm:3.12.3"
+  checksum: 10c0/bf839a3beb9937e3ca8ac4973345942f4fa41b87d1921c91de25a872bf70540f66ce6401c489aa3d30e0264d1e9b0dd90ae0a5d9aecaf2fa993881c96fb94bc2
   languageName: node
   linkType: hard
 
@@ -5669,9 +5669,9 @@ __metadata:
     "@electron-forge/plugin-fuses": "npm:7.9.0"
     "@electron-forge/plugin-vite": "npm:7.9.0"
     "@electron/fuses": "npm:2.0.0"
-    "@junipero/react": "npm:3.12.1"
+    "@junipero/react": "npm:3.12.4"
     "@junipero/tailwind-plugin": "npm:3.12.2"
-    "@junipero/theme": "npm:3.12.0"
+    "@junipero/theme": "npm:3.12.3"
     "@poool/eslint-config": "npm:5.0.6"
     "@radix-ui/themes": "npm:3.2.1"
     "@tailwindcss/vite": "npm:4.1.13"

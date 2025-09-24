@@ -14,7 +14,13 @@ import {
 } from 'electron';
 import started from 'electron-squirrel-startup';
 
-import type { AppPayload, GameProject, GameScene, GameVariables } from './types';
+import type {
+  AppPayload,
+  GameProject,
+  GameScene,
+  GameVariables,
+} from './types';
+import { createMenus } from './menus';
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -25,6 +31,8 @@ if (started) {
 protocol.registerSchemesAsPrivileged([
   { scheme: 'project', privileges: { bypassCSP: true } },
 ]);
+
+createMenus();
 
 const createSelectionWindow = () => {
   const win = new BrowserWindow({

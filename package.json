@@ -18,8 +18,8 @@
     "lint": "eslint --max-warnings=0 --cache ."
   },
   "dependencies": {
-    "@junipero/react": "3.12.1",
-    "@junipero/theme": "3.12.0",
+    "@junipero/react": "3.12.4",
+    "@junipero/theme": "3.12.3",
     "@radix-ui/themes": "3.2.1",
     "electron-squirrel-startup": "1.0.1",
     "re-resizable": "6.11.2",

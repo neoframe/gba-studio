@@ -38,3 +38,13 @@ export const useQuery = <T = Record<string, string>>(init: T = {} as T) => {
 
 export const useApp = () => useContext(AppContext);
 export const useCanvas = () => useContext(CanvasContext);
+
+export const useBridgeListener = (
+  channel: string,
+  func: (...args: any[]) => void,
+  deps: any[] = [],
+) => {
+  useEffect(() => {
+    return window.electron.addEventListener(channel, func);
+  }, [func, ...deps]);
+};
