@@ -1,5 +1,7 @@
 export type VariableValue = string | number | boolean;
 
+export type ToolType = 'move' | 'add' | 'collisions';
+
 export interface GameVariables {
   values: Record<string, VariableValue>;
   // Internals

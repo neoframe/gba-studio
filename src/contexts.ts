@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import type { GameProject, GameScene, GameVariables } from './types';
+import type { GameProject, GameScene, GameVariables, ToolType } from './types';
 
 export interface AppContextType {
   scenes: GameScene[];
@@ -18,7 +18,10 @@ export const AppContext = createContext<AppContextType>({
 });
 
 export interface CanvasContextType {
-  selected?: GameScene;
+  selectedScene?: GameScene;
+  tool: ToolType;
 };
 
-export const CanvasContext = createContext<CanvasContextType>({});
+export const CanvasContext = createContext<CanvasContextType>({
+  tool: 'move',
+});

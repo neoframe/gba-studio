@@ -32,7 +32,7 @@ const Scene = ({
 }: SceneProps) => {
   const { zoom } = useInfiniteCanvas();
   const { projectBase, project } = useApp();
-  const { selected } = useCanvas();
+  const { selectedScene } = useCanvas();
 
   const sceneConfig = useMemo(() => (
     project?.scenes?.find(s => s._file === scene._file)
@@ -59,7 +59,7 @@ const Scene = ({
     e.stopPropagation();
 
     onSelect?.(scene);
-  }, [onSelect, scene, selected]);
+  }, [onSelect, scene, selectedScene]);
 
   const onMoveEnd = useCallback((e: MoveableState) => {
     onMove?.(scene, e);
@@ -76,14 +76,14 @@ const Scene = ({
       <div
         className={classNames(
           'relative select-none',
-          { 'z-100' : selected === scene },
+          { 'z-100' : selectedScene === scene },
         )}
       >
         <Card
           className={classNames(
             '!relative bg-cover bg-center transition-[outline-width]',
             'duration-200',
-            { '!outline-4 !outline-(--accent-9)': selected === scene },
+            { '!outline-4 !outline-(--accent-9)': selectedScene === scene },
             className
           )}
           style={{
