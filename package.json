@@ -1,6 +1,6 @@
 {
   "name": "gba-studio",
-  "productName": "gba-studio",
+  "productName": "GBA Studio",
   "type": "module",
   "version": "1.0.0",
   "description": "GB Studio, but worse & for the GBA",
@@ -18,11 +18,12 @@
     "lint": "eslint --max-warnings=0 --cache ."
   },
   "dependencies": {
-    "@junipero/react": "3.12.4",
+    "@junipero/react": "3.12.6",
     "@junipero/theme": "3.12.3",
     "@radix-ui/react-icons": "1.3.2",
     "@radix-ui/themes": "3.2.1",
     "electron-squirrel-startup": "1.0.1",
+    "electron-window-corner-addon": "0.1.1",
     "re-resizable": "6.11.2",
     "react": "19.1.1",
     "react-dom": "19.1.1",

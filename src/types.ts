@@ -1,18 +1,21 @@
+export interface RecentProject {
+  name: string;
+  path: string;
+}
+
+export interface AppStorage {
+  recentProjects?: RecentProject[];
+}
+
 export type VariableValue = string | number | boolean;
 
-export type ToolType = 'move' | 'add' | 'collisions';
+export type ToolType = 'move' | 'add' | 'collisions' | 'pan';
+export type AddSubtoolType = 'sensor' | 'actor';
 
 export interface GameVariables {
   values: Record<string, VariableValue>;
   // Internals
   _file?: string;
-}
-
-export interface MapSensor {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 }
 
 export interface GameMap {
@@ -22,7 +25,7 @@ export interface GameMap {
   gridSize: number;
   scene: string;
   collisions: string[];
-  sensors: MapSensor[];
+  sensors: GameSensor[];
   // Internals
   _file?: string;
 }
@@ -36,13 +39,30 @@ export interface GameScene {
   _file?: string;
 }
 
+export interface GameActor {
+  name: string;
+  x: number;
+  y: number;
+  sprite: string;
+}
+
+export interface GameSensor {
+  name: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface ProjectSceneData {
   x: number;
   y: number;
+  // Internals
   _file?: string;
 }
 
 export interface GameProject {
+  name: string;
   scenes: ProjectSceneData[];
 }
 

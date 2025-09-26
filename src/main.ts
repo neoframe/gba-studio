@@ -1,6 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import url from 'node:url';
+import { createRequire } from 'node:module';
 
 import {
   BrowserWindow,
@@ -21,8 +22,12 @@ import type {
   GameVariables,
 } from './types';
 import { createMenus } from './menus';
+import Storage from './services/storage';
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+// electron-window-corner-addon polyfill
+global.require = createRequire(import.meta.url);
 
 if (started) {
   app.quit();
@@ -34,17 +39,39 @@ protocol.registerSchemesAsPrivileged([
 
 createMenus();
 
-const createSelectionWindow = () => {
+const storage = new Storage();
+
+const createSelectionWindow = async () => {
+  const {
+    WindowCorner,
+    VibrancyMaterial,
+    EffectState,
+  } = await import('electron-window-corner-addon');
+
   const win = new BrowserWindow({
-    width: 500,
-    height: 400,
-    backgroundColor: nativeTheme.shouldUseDarkColors
-      ? '#121212' : '#FFFFFF',
+    width: 720,
+    height: 480,
+    frame: false,
+    maximizable: false,
+    resizable: false,
+    minimizable: false,
+    transparent: true,
+    titleBarStyle: 'hidden',
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
     },
   });
+
+  win.setWindowButtonVisibility(false);
+
+  WindowCorner.setCornerRadius(
+    win,
+    26,
+    VibrancyMaterial.UNDER_WINDOW_BACKGROUND,
+    EffectState.ACTIVE,
+  );
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     const url = new URL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
@@ -60,16 +87,32 @@ const createSelectionWindow = () => {
       } },
     );
   }
+
+  win.show();
+
+  return win;
 };
 
-const createProjectWindow = (projectPath: string) => {
+const createProjectWindow = async (projectPath: string) => {
+  const {
+    WindowCorner,
+    VibrancyMaterial,
+    EffectState,
+  } = await import('electron-window-corner-addon');
+
   const projectName = path.basename(projectPath, '.gbasproj');
   const ses = session.fromPartition(projectName);
 
   const win = new BrowserWindow({
     width: 800,
     height: 600,
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#121212' : '#FFFFFF',
+    frame: false,
+    transparent: true,
+    titleBarStyle: 'hiddenInset',
+    trafficLightPosition: {
+      x: 24,
+      y: 24,
+    },
     show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -90,7 +133,6 @@ const createProjectWindow = (projectPath: string) => {
   });
 
   win.maximize();
-  win.show();
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -112,6 +154,17 @@ const createProjectWindow = (projectPath: string) => {
       } },
     );
   }
+
+  win.show();
+
+  WindowCorner.setCornerRadius(
+    win,
+    26,
+    VibrancyMaterial.UNDER_WINDOW_BACKGROUND,
+    EffectState.ACTIVE,
+  );
+
+  return win;
 };
 
 app.whenReady().then(() => {
@@ -130,7 +183,21 @@ app.on('activate', () => {
   }
 });
 
-ipcMain.handle('open-file-dialog', async () => {
+ipcMain.handle('get-recent-projects', async () => {
+  const { recentProjects } = storage.config;
+
+  return recentProjects || [];
+});
+
+ipcMain.handle('open-recent-project', async (event, projectPath: string) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  win?.hide();
+  win?.close();
+  await new Promise(resolve => setTimeout(resolve, 100));
+  createProjectWindow(projectPath);
+});
+
+ipcMain.handle('open-file-dialog', async event => {
   const paths = await dialog.showOpenDialog({
     properties: ['openDirectory', 'openFile'],
   });
@@ -138,6 +205,9 @@ ipcMain.handle('open-file-dialog', async () => {
   if (!paths.filePaths[0]) {
     return;
   }
+
+  const selectionWin = BrowserWindow.fromWebContents(event.sender);
+  selectionWin?.close();
 
   const stats = await fs.stat(paths.filePaths[0]);
 
@@ -177,6 +247,20 @@ ipcMain.handle('load-project', async (event, projectPath: string) => {
     .readFile(projectPath, 'utf-8'));
   current++;
   win?.setProgressBar(current / total);
+
+  // Save project to recent projects
+  storage.config = {
+    ...storage.config,
+    recentProjects: [
+      {
+        name: project.name,
+        path: projectPath,
+      },
+      ...(storage.config.recentProjects || [])
+        .filter(p => p.path !== projectPath).slice(0, 9),
+    ],
+  };
+  storage.save();
 
   // Prepare variables
   const variableFiles = await getDataFiles(

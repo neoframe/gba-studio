@@ -151,6 +151,13 @@ const App = () => {
         ?.find(sc => sc._file === scene._file);
 
       if (foundScene) {
+        if (
+          foundScene.x === Math.round(e.deltaX || 0) &&
+          foundScene.y === Math.round(e.deltaY || 0)
+        ) {
+          return s;
+        }
+
         foundScene.x = Math.round(e.deltaX || 0);
         foundScene.y = Math.round(e.deltaY || 0);
       } else if (s.project && scene._file) {
@@ -166,23 +173,36 @@ const App = () => {
     });
   }, [addToHistory]);
 
+  const onCanvasChange = useCallback((scenes: GameScene[]) => {
+    dispatch(s => ({
+      ...s,
+      scenes,
+      history: addToHistory(s),
+      historyIndex: 0,
+      dirty: true,
+    }));
+  }, [addToHistory]);
+
   const getContext = useCallback((): AppContextType => ({
     project: state.project,
     scenes: state.scenes,
+    dirty: state.dirty,
     variables: state.variables,
     projectPath: projectPath || '',
     projectBase: state.projectBase,
   }), [
     projectPath,
     state.scenes, state.projectBase, state.variables, state.project,
+    state.dirty,
   ]);
 
   return (
-    <Theme>
+    <Theme hasBackground={false}>
       <AppContext.Provider value={getContext()}>
         { projectPath ? (
           <Canvas
             onMoveScene={onMoveScene}
+            onChange={onCanvasChange}
           />
         ) : (
           <ProjectSelection />

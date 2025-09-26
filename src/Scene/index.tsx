@@ -12,14 +12,16 @@ import {
 } from '@junipero/react';
 import { Card } from '@radix-ui/themes';
 
-import type { GameScene } from '../types';
+import type { GameScene, GameSensor } from '../types';
 import { useApp, useCanvas } from '../hooks';
+import { pixelToTile, tileToPixel } from '../services/utils';
 
 export interface SceneProps
   extends Omit<ComponentPropsWithoutRef<'div'>, 'onSelect' | 'onChange'> {
   scene: GameScene;
   onChange?: (scene: GameScene) => void;
   onSelect?: (scene: GameScene) => void;
+  onSelectSensor?: (scene: GameScene, sensor: GameSensor) => void;
   onMove?: (scene: GameScene, e: MoveableState) => void;
 }
 
@@ -28,11 +30,12 @@ const Scene = ({
   className,
   onChange,
   onSelect,
+  onSelectSensor,
   onMove,
 }: SceneProps) => {
   const { zoom } = useInfiniteCanvas();
   const { projectBase, project } = useApp();
-  const { selectedScene } = useCanvas();
+  const { selectedScene, selectedItem, tool } = useCanvas();
 
   const sceneConfig = useMemo(() => (
     project?.scenes?.find(s => s._file === scene._file)
@@ -57,21 +60,36 @@ const Scene = ({
   const onSelect_ = useCallback((e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-
     onSelect?.(scene);
   }, [onSelect, scene, selectedScene]);
 
-  const onMoveEnd = useCallback((e: MoveableState) => {
+  const onMovedScene = useCallback((e: MoveableState) => {
     onMove?.(scene, e);
   }, [onChange, scene]);
+
+  const onMovedSensor = useCallback((sensor: GameSensor, e: MoveableState) => {
+    sensor.x = pixelToTile(e.deltaX, gridSize);
+    sensor.y = pixelToTile(e.deltaY, gridSize);
+    onChange?.(scene);
+  }, [onChange, scene, gridSize]);
+
+  const onSelectSensor_ = useCallback((
+    sensor: GameSensor,
+    e: MouseEvent<HTMLDivElement>
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSelectSensor?.(scene, sensor);
+  }, [onSelectSensor, scene]);
 
   return (
     <Moveable
       onMouseDown={onSelect_}
-      onMoveEnd={onMoveEnd}
+      onMoveEnd={onMovedScene}
       transformScale={zoom}
       x={sceneConfig?.x || 0}
       y={sceneConfig?.y || 0}
+      disabled={tool !== 'move' || selectedScene !== scene || !!selectedItem}
     >
       <div
         className={classNames(
@@ -114,19 +132,32 @@ const Scene = ({
           )) }
 
           { sensors.map((sensor, i) => (
-            <div
+            <Moveable
               key={i}
-              className={classNames(
-                'absolute bg-orange-500/50 pointer-events-none border-2',
-                'border-orange-500'
-              )}
+              transformScale={zoom}
+              disabled={tool !== 'move' || selectedItem !== sensor}
+              x={tileToPixel(sensor.x || 0, gridSize)}
+              y={tileToPixel(sensor.y || 0, gridSize)}
+              onMouseDown={e => e.stopPropagation()}
+              onMoveEnd={onMovedSensor.bind(null, sensor)}
+              step={gridSize}
               style={{
-                left: (sensor.x || 0) * gridSize,
-                top: (sensor.y || 0) * gridSize,
-                width: (sensor.width || 1) * gridSize,
-                height: (sensor.height || 1) * gridSize,
+                left: 0,
+                top: 0,
+                width: tileToPixel(sensor.width || 1, gridSize),
+                height: tileToPixel(sensor.height || 1, gridSize),
               }}
-            />
+            >
+              <div
+                key={i}
+                className={classNames(
+                  'absolute bg-orange-500/50 border-2',
+                  'border-orange-500',
+                  { 'bg-yellow-500': selectedItem === sensor}
+                )}
+                onClick={onSelectSensor_.bind(null, sensor)}
+              />
+            </Moveable>
           )) }
         </Card>
         <span className="absolute block w-full left-0 bottom-full text-center">

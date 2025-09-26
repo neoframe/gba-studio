@@ -1,14 +1,31 @@
-import type { ComponentPropsWithoutRef } from 'react';
+import { type ComponentPropsWithoutRef, useCallback } from 'react';
 import { classNames } from '@junipero/react';
-import { CursorArrowIcon, PlusIcon } from '@radix-ui/react-icons';
-import { Card, DropdownMenu, IconButton } from '@radix-ui/themes';
+import {
+  ComponentBooleanIcon,
+  CursorArrowIcon,
+  HandIcon,
+  PlusIcon,
+} from '@radix-ui/react-icons';
+import { Card, DropdownMenu, IconButton, Tooltip } from '@radix-ui/themes';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { useCanvas } from '../hooks';
+import { AddSubtoolType, ToolType } from '../types';
 
-export interface ToolbarProps extends ComponentPropsWithoutRef<'div'> {}
+export interface ToolbarProps extends ComponentPropsWithoutRef<'div'> {
+  onSelectTool?: (tool: ToolType) => void;
+}
 
-const Toolbar = ({ className, ...props }: ToolbarProps) => {
+const Toolbar = ({ className, onSelectTool, ...props }: ToolbarProps) => {
   const { tool } = useCanvas();
+
+  const onAddClick = useCallback((_: AddSubtoolType) => {
+    onSelectTool?.('add');
+  }, [onSelectTool]);
+
+  useHotkeys('v', () => onSelectTool?.('move'), [onSelectTool]);
+  useHotkeys('a', () => onSelectTool?.('add'), [onSelectTool]);
+  useHotkeys('c', () => onSelectTool?.('collisions'), [onSelectTool]);
 
   return (
     <Card
@@ -23,12 +40,29 @@ const Toolbar = ({ className, ...props }: ToolbarProps) => {
         className="!m-0"
         size="2"
         variant={tool === 'move' ? 'solid' : 'ghost'}
+        onClick={onSelectTool?.bind(null, 'move')}
       >
-        <CursorArrowIcon
-          width={20}
-          height={20}
-          className="fill-onyx dark:fill-seashell"
-        />
+        <Tooltip content="Select/Move">
+          <CursorArrowIcon
+            width={20}
+            height={20}
+            className="[&_path]:fill-onyx dark:[&_path]:fill-seashell"
+          />
+        </Tooltip>
+      </IconButton>
+      <IconButton
+        className="!m-0 !ml-2"
+        size="2"
+        variant={tool === 'pan' ? 'solid' : 'ghost'}
+        onClick={onSelectTool?.bind(null, 'pan')}
+      >
+        <Tooltip content="Pan">
+          <HandIcon
+            width={20}
+            height={20}
+            className="[&_path]:fill-onyx dark:[&_path]:fill-seashell"
+          />
+        </Tooltip>
       </IconButton>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger>
@@ -37,18 +71,38 @@ const Toolbar = ({ className, ...props }: ToolbarProps) => {
             size="2"
             variant={tool === 'add' ? 'solid' : 'ghost'}
           >
-            <PlusIcon
-              width={20}
-              height={20}
-              className="[&_path]:fill-onyx dark:[&_path]:fill-seashell"
-            />
+            <Tooltip content="Add">
+              <PlusIcon
+                width={20}
+                height={20}
+                className="[&_path]:fill-onyx dark:[&_path]:fill-seashell"
+              />
+            </Tooltip>
           </IconButton>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content sideOffset={20} align="center">
-          <DropdownMenu.Item>Sensor</DropdownMenu.Item>
-          <DropdownMenu.Item>Actor</DropdownMenu.Item>
+          <DropdownMenu.Item onClick={onAddClick.bind(null, 'sensor')}>
+            Sensor
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onClick={onAddClick.bind(null, 'actor')}>
+            Actor
+          </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Root>
+      <IconButton
+        className="!m-0 !ml-auto"
+        size="2"
+        variant={tool === 'collisions' ? 'solid' : 'ghost'}
+        onClick={onSelectTool?.bind(null, 'collisions')}
+      >
+        <Tooltip content="Collisions">
+          <ComponentBooleanIcon
+            width={20}
+            height={20}
+            className="[&_path]:fill-onyx dark:[&_path]:fill-seashell"
+          />
+        </Tooltip>
+      </IconButton>
     </Card>
   );
 };

@@ -1,6 +1,13 @@
 import { createContext } from 'react';
 
-import type { GameProject, GameScene, GameVariables, ToolType } from './types';
+import type {
+  GameActor,
+  GameProject,
+  GameScene,
+  GameSensor,
+  GameVariables,
+  ToolType,
+} from './types';
 
 export interface AppContextType {
   scenes: GameScene[];
@@ -8,6 +15,7 @@ export interface AppContextType {
   variables: GameVariables[];
   projectPath: string;
   projectBase: string;
+  dirty: boolean;
 };
 
 export const AppContext = createContext<AppContextType>({
@@ -15,10 +23,12 @@ export const AppContext = createContext<AppContextType>({
   variables: [],
   projectPath: '',
   projectBase: '',
+  dirty: false,
 });
 
 export interface CanvasContextType {
   selectedScene?: GameScene;
+  selectedItem?: GameActor | GameSensor;
   tool: ToolType;
 };
 

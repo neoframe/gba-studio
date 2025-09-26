@@ -12,6 +12,8 @@ interface AppBridge extends EventTarget {
     func: ((...args: any[]) => void)
   ): void;
 
+  getRecentProjects(): Promise<RecentProject[]>;
+  openRecentProject(projectPath: string): Promise<void>;
   openFileDialog(): Promise<string>;
   loadProject(path: string): Promise<AppPayload>;
   saveProject(path: string, payload: AppPayload): Promise<void>;
@@ -20,3 +22,8 @@ interface AppBridge extends EventTarget {
 interface Window {
   electron: AppBridge;
 };
+
+declare module '*.svg?url' {
+  const content: string;
+  export default content;
+}
