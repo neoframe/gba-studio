@@ -17,8 +17,10 @@ import started from 'electron-squirrel-startup';
 
 import type {
   AppPayload,
+  GameBackground,
   GameProject,
   GameScene,
+  GameSprite,
   GameVariables,
 } from './types';
 import { createMenus } from './menus';
@@ -160,7 +162,7 @@ const createProjectWindow = async (projectPath: string) => {
   WindowCorner.setCornerRadius(
     win,
     26,
-    VibrancyMaterial.UNDER_WINDOW_BACKGROUND,
+    VibrancyMaterial.WINDOW_BACKGROUND,
     EffectState.ACTIVE,
   );
 
@@ -233,6 +235,15 @@ const getDataFiles = async (
     .filter(file => cond(file));
 };
 
+const getGraphicsFiles = async (
+  base: string,
+  cond: (file: string) => boolean = () => true
+) => {
+  return (await fs
+    .readdir(path.join(base, 'graphics')))
+    .filter(file => cond(file));
+};
+
 ipcMain.handle('load-project', async (event, projectPath: string) => {
   const projectDir = path.dirname(projectPath);
 
@@ -283,6 +294,15 @@ ipcMain.handle('load-project', async (event, projectPath: string) => {
   );
   total += sceneFiles.length;
 
+  // Prepare graphics
+  const graphicsFiles = await getGraphicsFiles(
+    projectDir,
+    file => file.endsWith('.json')
+  );
+  total += graphicsFiles.length;
+
+  // Prepare backgrounds
+
   // Load variables
   const variables: GameVariables[] = [];
 
@@ -319,12 +339,33 @@ ipcMain.handle('load-project', async (event, projectPath: string) => {
     scenes.push(scene);
   }
 
+  // Load graphics
+  const sprites: GameSprite[] = [];
+  const backgrounds: GameBackground[] = [];
+
+  for (const file of graphicsFiles) {
+    const graphic: GameSprite | GameBackground = JSON.parse(await fs
+      .readFile(path.join(projectDir, 'graphics', file), 'utf-8'));
+
+    if (['sprite'].includes(graphic.type)) {
+      sprites.push(graphic);
+    } else if (['regular_bg'].includes(graphic.type)) {
+      backgrounds.push(graphic);
+    }
+
+    graphic._file = file;
+    current++;
+    win?.setProgressBar(current / total);
+  }
+
   win?.setProgressBar(-1);
 
   return {
     project,
     scenes,
     variables,
+    sprites,
+    backgrounds,
   } as AppPayload;
 });
 

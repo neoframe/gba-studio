@@ -111,7 +111,9 @@ const Canvas = ({
             'flex-none pointer-events-auto',
           )}
         >
-          <Sidebar />
+          <Sidebar
+            onSceneChange={onSceneChange}
+          />
         </Resizable>
       </div>
       <div

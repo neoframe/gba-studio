@@ -2,7 +2,9 @@ import {
   type ComponentPropsWithoutRef,
   type MouseEvent,
   useCallback,
+  useEffect,
   useMemo,
+  useState,
 } from 'react';
 import {
   type MoveableState,
@@ -14,7 +16,7 @@ import { Card } from '@radix-ui/themes';
 
 import type { GameScene, GameSensor } from '../types';
 import { useApp, useCanvas } from '../hooks';
-import { pixelToTile, tileToPixel } from '../services/utils';
+import { getImageSize, pixelToTile, tileToPixel } from '../services/utils';
 
 export interface SceneProps
   extends Omit<ComponentPropsWithoutRef<'div'>, 'onSelect' | 'onChange'> {
@@ -36,6 +38,7 @@ const Scene = ({
   const { zoom } = useInfiniteCanvas();
   const { projectBase, project } = useApp();
   const { selectedScene, selectedItem, tool } = useCanvas();
+  const [size, setSize] = useState([240, 160]);
 
   const sceneConfig = useMemo(() => (
     project?.scenes?.find(s => s._file === scene._file)
@@ -43,7 +46,29 @@ const Scene = ({
 
   const backgroundPath = useMemo(() => scene.background ? (
     `project://graphics/${scene.background}.bmp`
-  ) : '', [projectBase, scene]);
+  ) : '', [projectBase, scene.background]);
+
+  const updateSize = useCallback(async () => {
+    if (scene.map) {
+      setSize([
+        Math.max(240, (scene.map.width || 0) * (scene.map.gridSize || 16)),
+        Math.max(160, (scene.map.height || 0) * (scene.map.gridSize || 16)),
+      ]);
+
+      return;
+    }
+
+    try {
+      const [width, height] = await getImageSize(backgroundPath);
+      setSize([Math.max(240, width), Math.max(160, height)]);
+    } catch {
+      setSize([240, 160]);
+    }
+  }, [backgroundPath, scene.map]);
+
+  useEffect(() => {
+    updateSize();
+  }, [updateSize]);
 
   const collisions = useMemo(() => (
     scene.map?.collisions?.map(line => line.split(','))
@@ -108,10 +133,8 @@ const Scene = ({
             backgroundImage: `url(${backgroundPath})`,
             contain: 'none',
             imageRendering: 'pixelated',
-            width: Math.max(240,
-              (scene.map?.width || 0) * (scene.map?.gridSize || 16)),
-            height: Math.max(160,
-              (scene.map?.height || 0) * (scene.map?.gridSize || 16)),
+            width: size[0],
+            height: size[1],
           }}
         >
           { collisions?.map((line, y) => (

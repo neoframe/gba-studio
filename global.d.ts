@@ -16,7 +16,7 @@ interface AppBridge extends EventTarget {
   openRecentProject(projectPath: string): Promise<void>;
   openFileDialog(): Promise<string>;
   loadProject(path: string): Promise<AppPayload>;
-  saveProject(path: string, payload: AppPayload): Promise<void>;
+  saveProject(path: string, payload: Partial<AppPayload>): Promise<void>;
 }
 
 interface Window {

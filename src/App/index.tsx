@@ -5,8 +5,10 @@ import { useHotkeys } from 'react-hotkeys-hook';
 
 import type {
   AppPayload,
+  GameBackground,
   GameProject,
   GameScene,
+  GameSprite,
   GameVariables,
 } from '../types';
 import { type AppContextType, AppContext } from '../contexts';
@@ -19,7 +21,9 @@ export interface AppState {
   theme: string;
   scenes: GameScene[];
   variables: GameVariables[];
-  history: AppPayload[];
+  sprites: GameSprite[];
+  backgrounds: GameBackground[];
+  history: Partial<AppPayload>[];
   historyIndex: number;
   loading: boolean;
   ready: boolean;
@@ -36,6 +40,8 @@ const App = () => {
     ready: false,
     scenes: [],
     variables: [],
+    sprites: [],
+    backgrounds: [],
     project: undefined,
     dirty: false,
     history: [],
@@ -80,7 +86,10 @@ const App = () => {
         variables: state.variables,
       });
     }
-  }, [projectPath, state.project, state.scenes, state.variables]);
+  }, [
+    projectPath,
+    state.project, state.scenes, state.variables,
+  ]);
 
   useHotkeys('mod+s', e => {
     e.preventDefault();
@@ -133,7 +142,7 @@ const App = () => {
   }, [redo]);
 
   const addToHistory = useCallback((currentState: AppState) => {
-    const newHistoryEntry: AppPayload = {
+    const newHistoryEntry: Partial<AppPayload> = {
       project: cloneDeep(currentState.project!),
       scenes: cloneDeep(currentState.scenes),
       variables: cloneDeep(currentState.variables),
@@ -188,12 +197,14 @@ const App = () => {
     scenes: state.scenes,
     dirty: state.dirty,
     variables: state.variables,
+    sprites: state.sprites,
+    backgrounds: state.backgrounds,
     projectPath: projectPath || '',
     projectBase: state.projectBase,
   }), [
     projectPath,
     state.scenes, state.projectBase, state.variables, state.project,
-    state.dirty,
+    state.dirty, state.sprites, state.backgrounds,
   ]);
 
   return (

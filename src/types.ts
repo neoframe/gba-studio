@@ -32,6 +32,7 @@ export interface GameMap {
 
 export interface GameScene {
   type: 'scene';
+  sceneType: 'logos' | '2d-top-down';
   name: string;
   background?: string;
   map?: GameMap;
@@ -66,8 +67,22 @@ export interface GameProject {
   scenes: ProjectSceneData[];
 }
 
+export interface GameSprite {
+  type: string;
+  // Internals
+  _file?: string;
+}
+
+export interface GameBackground {
+  type: string;
+  // Internals
+  _file?: string;
+}
+
 export interface AppPayload {
   project: GameProject;
   scenes: GameScene[];
   variables: GameVariables[];
+  sprites: GameSprite[];
+  backgrounds: GameBackground[];
 };
