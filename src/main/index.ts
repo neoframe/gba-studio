@@ -14,6 +14,8 @@ import {
   session,
 } from 'electron';
 import started from 'electron-squirrel-startup';
+import fse from 'fs-extra';
+import slugify from 'slugify';
 
 import type {
   AppPayload,
@@ -22,6 +24,7 @@ import type {
   GameScene,
   GameSprite,
   GameVariables,
+  ProjectTemplate,
 } from '../types';
 import { createMenus } from './menus';
 import Storage from './storage';
@@ -269,18 +272,7 @@ ipcMain.handle('load-project', async (event, projectPath: string) => {
   win?.setProgressBar(current / total);
 
   // Save project to recent projects
-  storage.config = {
-    ...storage.config,
-    recentProjects: [
-      {
-        name: project.name,
-        path: projectPath,
-      },
-      ...(storage.config.recentProjects || [])
-        .filter(p => p.path !== projectPath).slice(0, 9),
-    ],
-  };
-  storage.save();
+  storage.addRecentProject(projectPath, project);
 
   // Prepare variables
   const variableFiles = await getDataFiles(
@@ -446,4 +438,46 @@ ipcMain.handle('get-directory-path', async (_event, opts?: {
   });
 
   return path.join(opts?.prefix || '', result.filePaths[0], opts?.suffix || '');
+});
+
+ipcMain.handle('create-project', async (event, opts: {
+  type: ProjectTemplate;
+  path: string;
+  name: string;
+}) => {
+  const projectDir = path.dirname(opts?.path || '');
+
+  await fs.mkdir(projectDir, { recursive: true });
+
+  // Copy commons
+  await fse.copy(
+    path.join(__dirname, '../templates/commons'),
+    projectDir
+  );
+
+  // Copy template
+  await fse.copy(
+    path.join(__dirname, `../templates/${opts.type}`),
+    projectDir
+  );
+
+  // Create .gbasproj
+  const project: GameProject = {
+    name: opts.name || 'My Awesome Game',
+    scenes: [],
+  };
+
+  const projectPath = path.join(opts.path, `${slugify(opts.name)}.gbasproj`);
+  await fs.writeFile(projectPath,
+    JSON.stringify(project, null, 2) + '\n', 'utf-8');
+
+  storage.addRecentProject(projectPath, project);
+
+  // Close selection window
+  const win = BrowserWindow.fromWebContents(event.sender);
+  win?.hide();
+  win?.close();
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  createProjectWindow(projectPath);
 });

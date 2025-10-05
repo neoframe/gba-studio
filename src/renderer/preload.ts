@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron/renderer';
 
-import type { AppPayload, RecentProject } from '../types';
+import type { AppPayload, ProjectTemplate, RecentProject } from '../types';
 
 contextBridge.exposeInMainWorld('electron', {
   // EventTarget
@@ -30,4 +30,10 @@ contextBridge.exposeInMainWorld('electron', {
     suffix?: string;
   }): Promise<string> =>
     ipcRenderer.invoke('get-directory-path', opts),
+  createProject: (opts: {
+    type: ProjectTemplate;
+    name: string;
+    path: string;
+  }): Promise<void> =>
+    ipcRenderer.invoke('create-project', opts),
 } as Omit<AppBridge, 'dispatchEvent'>);

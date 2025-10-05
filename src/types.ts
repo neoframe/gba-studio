@@ -1,5 +1,7 @@
 import type { ForwardRefExoticComponent } from 'react';
 
+export type ProjectTemplate = '2d-sample' | 'blank';
+
 export interface RecentProject {
   name: string;
   path: string;

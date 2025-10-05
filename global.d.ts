@@ -21,6 +21,11 @@ interface AppBridge extends EventTarget {
     prefix?: string;
     suffix?: string;
   }): Promise<string>;
+  createProject(opts: {
+    type: ProjectTemplate;
+    name: string;
+    path: string;
+  }): Promise<void>;
 }
 
 interface Window {

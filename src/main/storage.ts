@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { app } from 'electron';
 
-import type { AppStorage } from '../types';
+import type { AppStorage, GameProject } from '../types';
 
 export default class Storage {
   config: AppStorage = {};
@@ -22,10 +22,27 @@ export default class Storage {
 
   save () {
     const configPath = path.join(app.getPath('userData'), 'config.json');
-    fs.promises.writeFile(
+
+    return fs.promises.writeFile(
       configPath,
       JSON.stringify(this.config, null, 2) + '\n',
       'utf-8'
     );
+  }
+
+  addRecentProject (projectPath: string, project: GameProject) {
+    this.config = {
+      ...this.config,
+      recentProjects: [
+        {
+          name: project.name,
+          path: projectPath,
+        },
+        ...(this.config.recentProjects || [])
+          .filter(p => p.path !== projectPath).slice(0, 9),
+      ],
+    };
+
+    return this.save();
   }
 }
