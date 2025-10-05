@@ -20,8 +20,8 @@ const BackgroundsListField = ({
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
-        <Card>
-          <div className="flex items-center">
+        <Card className="!cursor-pointer select-none">
+          <div className="flex items-center gap-2">
             <Avatar
               src={`project://graphics/${val}.bmp`}
               fallback=""
@@ -38,11 +38,14 @@ const BackgroundsListField = ({
             key={bg._file}
             onClick={() => onValueChange?.(getGraphicName(bg._file))}
           >
-            <Avatar
-              src={`project://graphics/${getGraphicName(bg._file)}.bmp`}
-              fallback=""
-            />
-            <Text>{ getGraphicName(bg._file) }</Text>
+            <div className="flex items-center gap-2">
+              <Avatar
+                src={`project://graphics/${getGraphicName(bg._file)}.bmp`}
+                fallback=""
+                size="1"
+              />
+              <Text>{ getGraphicName(bg._file) }</Text>
+            </div>
           </DropdownMenu.Item>
         ))}
       </DropdownMenu.Content>

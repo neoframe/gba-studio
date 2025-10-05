@@ -17,6 +17,7 @@ export interface AppContextType {
   variables: GameVariables[];
   sprites: GameSprite[];
   backgrounds: GameBackground[];
+  sounds: string[];
   projectPath: string;
   projectBase: string;
   dirty: boolean;
@@ -27,6 +28,7 @@ export const AppContext = createContext<AppContextType>({
   variables: [],
   sprites: [],
   backgrounds: [],
+  sounds: [],
   projectPath: '',
   projectBase: '',
   dirty: false,

@@ -1,11 +1,18 @@
-import { ChangeEvent, KeyboardEvent, useCallback } from 'react';
-import { Heading, Inset, Select, Separator, Text } from '@radix-ui/themes';
+import { type ChangeEvent, type KeyboardEvent, useCallback } from 'react';
+import {
+  Heading,
+  Inset,
+  Select,
+  Separator,
+  Tabs,
+  Text,
+} from '@radix-ui/themes';
 import { classNames, set } from '@junipero/react';
 
 import type { GameScene } from '../../../types';
 import { getGraphicName, pixelToTile } from '../../../helpers';
-import { useApp } from '../../services/hooks';
 import BackgroundsListField from './BackgroundsListField';
+import EventsField from '../../components/EventsField';
 
 export interface SceneFormProps {
   scene: GameScene;
@@ -20,8 +27,6 @@ const SceneForm = ({
   scene,
   onChange,
 }: SceneFormProps) => {
-  const { backgrounds } = useApp();
-
   const onNameChange = useCallback((e: ChangeEvent<HTMLHeadingElement>) => {
     const name = (e.currentTarget.textContent || 'Untitled')
       .trim().slice(0, 32);
@@ -35,7 +40,7 @@ const SceneForm = ({
     });
   }, [onChange, scene]);
 
-  const onValueChange = useCallback((name: string, value: string) => {
+  const onValueChange = useCallback((name: string, value: any) => {
     set(scene, name, value);
     onChange?.(scene);
   }, [onChange, scene]);
@@ -107,6 +112,27 @@ const SceneForm = ({
         </div>
       </div>
       <Inset side="x"><Separator className="!w-full my-4" /></Inset>
+      <div className="flex flex-col gap-4 pb-10">
+        <div className="flex flex-col gap-2">
+          <Text className="block text-slate" size="1">Events</Text>
+          <Inset className="!rounded-none !overflow-visible">
+            <Tabs.Root defaultValue="init">
+              <Tabs.List size="1" className="px-1">
+                <Tabs.Trigger value="init">
+                  On Init
+                </Tabs.Trigger>
+              </Tabs.List>
+
+              <Tabs.Content value="init">
+                <EventsField
+                  value={scene.events ?? []}
+                  onValueChange={onValueChange.bind(null, 'events')}
+                />
+              </Tabs.Content>
+            </Tabs.Root>
+          </Inset>
+        </div>
+      </div>
     </div>
   );
 };

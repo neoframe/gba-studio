@@ -1,3 +1,5 @@
+import type { ForwardRefExoticComponent } from 'react';
+
 export interface RecentProject {
   name: string;
   path: string;
@@ -11,6 +13,17 @@ export type VariableValue = string | number | boolean;
 
 export type ToolType = 'move' | 'add' | 'collisions' | 'pan';
 export type AddSubtoolType = 'sensor' | 'actor';
+
+export interface ListItem {
+  name: string;
+  value: string;
+  icon?: ForwardRefExoticComponent<any>;
+}
+
+export interface ListCategory<T extends ListItem = ListItem> {
+  name: string;
+  items: T[];
+}
 
 export interface GameVariables {
   values: Record<string, VariableValue>;
@@ -31,11 +44,13 @@ export interface GameMap {
 }
 
 export interface GameScene {
+  id?: string;
   type: 'scene';
   sceneType: 'logos' | '2d-top-down';
   name: string;
   background?: string;
   map?: GameMap;
+  events?: SceneEvent[];
   // Internals
   _file?: string;
 }
@@ -85,24 +100,76 @@ export interface AppPayload {
   variables: GameVariables[];
   sprites: GameSprite[];
   backgrounds: GameBackground[];
+  sounds: string[];
 };
+
+export interface DynamicVariableValue {
+  type: 'variable';
+  name?: string;
+}
+
+export type DynamicValue =
+  | DynamicVariableValue;
+
+export type EventValue =
+  | string
+  | number
+  | DynamicValue;
 
 export interface SceneEvent {
   id: string;
   type: string;
+  name?: string;
+  // Internals
+  _collapsed?: boolean;
 }
 
 export interface WaitEvent extends SceneEvent {
   type: 'wait';
-  duration: number; // in ms
+  duration: EventValue;
 }
 
 export interface FadeInEvent extends SceneEvent {
   type: 'fade-in';
-  duration: number; // in ms
+  duration: EventValue;
 }
 
 export interface FadeOutEvent extends SceneEvent {
   type: 'fade-out';
-  duration: number; // in ms
+  duration: EventValue;
+}
+
+export interface GoToSceneEvent extends SceneEvent {
+  type: 'go-to-scene';
+  target: string;
+  start?: {
+    x?: EventValue;
+    y?: EventValue;
+    direction?: string;
+  };
+}
+
+export interface PlayMusicEvent extends SceneEvent {
+  type: 'play-music';
+  name: string;
+  volume?: number;
+  loop?: boolean;
+}
+
+export interface StopMusicEvent extends SceneEvent {
+  type: 'stop-music';
+}
+
+export interface PlaySoundEvent extends SceneEvent {
+  type: 'play-sound';
+  name: string;
+  volume?: number;
+  speed?: number;
+  pan?: number;
+  priority?: number;
+}
+
+export interface WaitForButtonEvent extends SceneEvent {
+  type: 'wait-for-button';
+  buttons: string[];
 }

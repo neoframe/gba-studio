@@ -1,4 +1,5 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useDeferredValue, useEffect, useState } from 'react';
+import { useTimeout } from '@junipero/react';
 
 import { AppContext, CanvasContext } from './contexts';
 
@@ -48,3 +49,26 @@ export const useBridgeListener = (
     return window.electron.addEventListener(channel, func);
   }, [func, ...deps]);
 };
+
+export interface UseDelayedValueOptions {
+  /**
+   * Delay in ms
+   */
+  delay?: number;
+}
+
+export function useDelayedValue<T> (
+  /**
+   * Value to delay
+   */
+  value: T,
+  { delay = 400 }: UseDelayedValueOptions = {}
+): T {
+  const [delayedValue, setDelayedValue] = useState(value);
+
+  useTimeout(() => {
+    setDelayedValue(value);
+  }, delay, [value, setDelayedValue]);
+
+  return useDeferredValue<T>(delayedValue);
+}

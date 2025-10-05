@@ -23,6 +23,7 @@ export interface AppState {
   variables: GameVariables[];
   sprites: GameSprite[];
   backgrounds: GameBackground[];
+  sounds: string[];
   history: Partial<AppPayload>[];
   historyIndex: number;
   loading: boolean;
@@ -42,6 +43,7 @@ const App = () => {
     variables: [],
     sprites: [],
     backgrounds: [],
+    sounds: [],
     project: undefined,
     dirty: false,
     history: [],
@@ -199,12 +201,13 @@ const App = () => {
     variables: state.variables,
     sprites: state.sprites,
     backgrounds: state.backgrounds,
+    sounds: state.sounds,
     projectPath: projectPath || '',
     projectBase: state.projectBase,
   }), [
     projectPath,
     state.scenes, state.projectBase, state.variables, state.project,
-    state.dirty, state.sprites, state.backgrounds,
+    state.dirty, state.sprites, state.backgrounds, state.sounds,
   ]);
 
   return (

@@ -244,6 +244,15 @@ const getGraphicsFiles = async (
     .filter(file => cond(file));
 };
 
+const getSoundFiles = async (
+  base: string,
+  cond: (file: string) => boolean = () => true
+) => {
+  return (await fs
+    .readdir(path.join(base, 'audio')))
+    .filter(file => cond(file));
+};
+
 ipcMain.handle('load-project', async (event, projectPath: string) => {
   const projectDir = path.dirname(projectPath);
 
@@ -301,7 +310,12 @@ ipcMain.handle('load-project', async (event, projectPath: string) => {
   );
   total += graphicsFiles.length;
 
-  // Prepare backgrounds
+  // Prepare sounds
+  const soundFiles = await getSoundFiles(
+    projectDir,
+    file => file.endsWith('.mod') || file.endsWith('.wav')
+  );
+  total += soundFiles.length;
 
   // Load variables
   const variables: GameVariables[] = [];
@@ -358,6 +372,15 @@ ipcMain.handle('load-project', async (event, projectPath: string) => {
     win?.setProgressBar(current / total);
   }
 
+  // Load sounds
+  const sounds: string[] = [];
+
+  for (const file of soundFiles) {
+    sounds.push(file);
+    current++;
+    win?.setProgressBar(current / total);
+  }
+
   win?.setProgressBar(-1);
 
   return {
@@ -366,6 +389,7 @@ ipcMain.handle('load-project', async (event, projectPath: string) => {
     variables,
     sprites,
     backgrounds,
+    sounds,
   } as AppPayload;
 });
 

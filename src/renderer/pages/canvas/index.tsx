@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import {
   type MoveableState,
   type InfiniteCanvasRef,
@@ -23,7 +23,7 @@ export interface CanvasProps {
 }
 
 export interface CanvasState {
-  selectedScene?: GameScene;
+  selectedScene?: string;
   selectedItem?: GameActor | GameSensor;
   tool: ToolType;
   previousTool: ToolType;
@@ -42,9 +42,23 @@ const Canvas = ({
     previousTool: 'move',
   });
 
+  const selectedScene = useMemo(() => (
+    scenes.find(s => s._file === state.selectedScene)
+  ), [scenes, state.selectedScene]);
+
   useEffect(() => {
     infiniteCanvasRef.current?.fitIntoView(200);
   }, []);
+
+  // useEffect(() => {
+  //   const selectedScene = scenes.find(s => s === state.selectedScene);
+
+  //   console.log('Scenes updated, selectedScene=', selectedScene);
+
+  //   if (selectedScene) {
+  //     dispatch({ selectedScene });
+  //   }
+  // }, [scenes, state.selectedScene]);
 
   useEventListener('keydown', (e: KeyboardEvent) => {
     if (e.key === ' ' && state.tool !== 'pan') {
@@ -59,21 +73,21 @@ const Canvas = ({
   }, [state.previousTool, state.tool]);
 
   const onSelectScene = useCallback((scene?: GameScene) => {
-    if (state.selectedScene === scene) {
+    if (selectedScene === scene) {
       dispatch({ selectedItem: undefined });
 
       return;
     }
 
-    dispatch({ selectedScene: scene, selectedItem: undefined });
-  }, [state.selectedScene]);
+    dispatch({ selectedScene: scene?._file, selectedItem: undefined });
+  }, [selectedScene]);
 
   const onSelectSensor = useCallback((scene: GameScene, sensor: GameSensor) => {
     if (state.selectedItem === sensor) {
       return;
     }
 
-    dispatch({ selectedScene: scene, selectedItem: sensor });
+    dispatch({ selectedScene: scene?._file, selectedItem: sensor });
   }, [state.selectedItem]);
 
   const onSelectTool = useCallback((tool: ToolType) => {
@@ -85,10 +99,10 @@ const Canvas = ({
   }, [onChange, scenes]);
 
   const getContext = useCallback((): CanvasContextType => ({
-    selectedScene: state.selectedScene,
+    selectedScene,
     selectedItem: state.selectedItem,
     tool: state.tool,
-  }), [state.selectedScene, state.selectedItem, state.tool]);
+  }), [selectedScene, state.selectedItem, state.tool]);
 
   return (
     <CanvasContext.Provider value={getContext()}>
