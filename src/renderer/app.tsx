@@ -156,7 +156,10 @@ const App = () => {
     return newHistory.slice(0, 50);
   }, []);
 
-  const onMoveScene = useCallback((scene: GameScene, e: MoveableState) => {
+  const onMoveScene = useCallback((
+    scene: GameScene,
+    e: Partial<MoveableState>
+  ) => {
     dispatch(s => {
       const foundScene = s.project?.scenes
         ?.find(sc => sc._file === scene._file);

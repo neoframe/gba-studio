@@ -30,7 +30,7 @@ export default class Storage {
     );
   }
 
-  addRecentProject (projectPath: string, project: GameProject) {
+  addToRecentProjects (projectPath: string, project: GameProject) {
     this.config = {
       ...this.config,
       recentProjects: [

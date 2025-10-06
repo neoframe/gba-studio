@@ -1,3 +1,4 @@
+import type { InfiniteCanvasCursorMode } from '@junipero/react';
 import type { ForwardRefExoticComponent } from 'react';
 
 export type ProjectTemplate = '2d-sample' | 'blank';
@@ -13,8 +14,8 @@ export interface AppStorage {
 
 export type VariableValue = string | number | boolean;
 
-export type ToolType = 'move' | 'add' | 'collisions' | 'pan';
-export type AddSubtoolType = 'sensor' | 'actor';
+export type ToolType = InfiniteCanvasCursorMode | 'collisions';
+export type AddSubtoolType = 'scene' | 'sensor' | 'actor';
 
 export interface ListItem {
   name: string;

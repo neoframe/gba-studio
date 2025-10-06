@@ -41,5 +41,5 @@ export interface CanvasContextType {
 };
 
 export const CanvasContext = createContext<CanvasContextType>({
-  tool: 'move',
+  tool: 'default',
 });

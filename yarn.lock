@@ -1332,9 +1332,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@junipero/react@npm:3.12.6":
-  version: 3.12.6
-  resolution: "@junipero/react@npm:3.12.6"
+"@junipero/react@npm:3.12.7":
+  version: 3.12.7
+  resolution: "@junipero/react@npm:3.12.7"
   dependencies:
     "@floating-ui/react": "npm:0.27.16"
     "@junipero/core": "npm:^3.12.3"
@@ -1342,7 +1342,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0 || ^19.0.0
     react-dom: ^18.0.0 || ^19.0.0
-  checksum: 10c0/4eceec432deea34cce87f243f0477f4c9e717f4e560045eaa3f709d54474042f629a529d70d7ba53b80e212fe705f51256f1aecdefffb5e43309441ecd53e4c5
+  checksum: 10c0/c8d97f5f92fadb8b21c22e2d4a848732ed2c20bd254b9e9411c3954f60dd1b294fcbd3b4511047e3640b7b7430359a7654206c5e8b45c9d7bb7e43570d2127c0
   languageName: node
   linkType: hard
 
@@ -3287,7 +3287,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/fs-extra@npm:^11":
+"@types/fs-extra@npm:11.0.4":
   version: 11.0.4
   resolution: "@types/fs-extra@npm:11.0.4"
   dependencies:
@@ -5720,7 +5720,7 @@ __metadata:
     "@electron-forge/plugin-fuses": "npm:7.9.0"
     "@electron-forge/plugin-vite": "npm:7.9.0"
     "@electron/fuses": "npm:2.0.0"
-    "@junipero/react": "npm:3.12.6"
+    "@junipero/react": "npm:3.12.7"
     "@junipero/tailwind-plugin": "npm:3.12.3"
     "@junipero/theme": "npm:3.12.3"
     "@poool/eslint-config": "npm:5.0.6"
@@ -5728,7 +5728,7 @@ __metadata:
     "@radix-ui/themes": "npm:3.2.1"
     "@tailwindcss/vite": "npm:4.1.14"
     "@types/electron-squirrel-startup": "npm:1.0.2"
-    "@types/fs-extra": "npm:^11"
+    "@types/fs-extra": "npm:11.0.4"
     "@types/react": "npm:19.2.0"
     "@types/react-dom": "npm:19.2.0"
     "@vitejs/plugin-react": "npm:5.0.4"

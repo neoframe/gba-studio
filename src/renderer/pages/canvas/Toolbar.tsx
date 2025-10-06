@@ -1,4 +1,4 @@
-import { type ComponentPropsWithoutRef, useCallback } from 'react';
+import { type ComponentPropsWithoutRef, useCallback, useState } from 'react';
 import { classNames } from '@junipero/react';
 import {
   ComponentBooleanIcon,
@@ -6,7 +6,14 @@ import {
   HandIcon,
   PlusIcon,
 } from '@radix-ui/react-icons';
-import { Card, DropdownMenu, IconButton, Tooltip } from '@radix-ui/themes';
+import {
+  Card,
+  DropdownMenu,
+  IconButton,
+  Kbd,
+  Text,
+  Tooltip,
+} from '@radix-ui/themes';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import { useCanvas } from '../../services/hooks';
@@ -17,15 +24,25 @@ export interface ToolbarProps extends ComponentPropsWithoutRef<'div'> {
 }
 
 const Toolbar = ({ className, onSelectTool, ...props }: ToolbarProps) => {
+  const [opened, setOpened] = useState(false);
   const { tool } = useCanvas();
 
   const onAddClick = useCallback((_: AddSubtoolType) => {
     onSelectTool?.('add');
   }, [onSelectTool]);
 
-  useHotkeys('v', () => onSelectTool?.('move'), [onSelectTool]);
-  useHotkeys('a', () => onSelectTool?.('add'), [onSelectTool]);
-  useHotkeys('c', () => onSelectTool?.('collisions'), [onSelectTool]);
+  useHotkeys('v', () => {
+    onSelectTool?.('default');
+  }, [onSelectTool], { useKey: true });
+
+  useHotkeys('a', () => {
+    onSelectTool?.('add');
+    setOpened(o => !o);
+  }, [], { useKey: true });
+
+  useHotkeys('c', () => {
+    onSelectTool?.('collisions');
+  }, [], { useKey: true });
 
   return (
     <Card
@@ -39,10 +56,17 @@ const Toolbar = ({ className, onSelectTool, ...props }: ToolbarProps) => {
       <IconButton
         className="!m-0"
         size="2"
-        variant={tool === 'move' ? 'solid' : 'ghost'}
-        onClick={onSelectTool?.bind(null, 'move')}
+        variant={tool === 'default' ? 'solid' : 'ghost'}
+        onClick={onSelectTool?.bind(null, 'default')}
       >
-        <Tooltip content="Select/Move">
+        <Tooltip
+          content={(
+            <span className="flex items-center gap-2">
+              <Text>Select/Move</Text>
+              <Kbd>V</Kbd>
+            </span>
+          )}
+        >
           <CursorArrowIcon
             width={20}
             height={20}
@@ -56,7 +80,14 @@ const Toolbar = ({ className, onSelectTool, ...props }: ToolbarProps) => {
         variant={tool === 'pan' ? 'solid' : 'ghost'}
         onClick={onSelectTool?.bind(null, 'pan')}
       >
-        <Tooltip content="Pan">
+        <Tooltip
+          content={(
+            <span className="flex items-center gap-2">
+              <Text>Pan</Text>
+              <Kbd>Space (hold)</Kbd>
+            </span>
+          )}
+        >
           <HandIcon
             width={20}
             height={20}
@@ -64,14 +95,21 @@ const Toolbar = ({ className, onSelectTool, ...props }: ToolbarProps) => {
           />
         </Tooltip>
       </IconButton>
-      <DropdownMenu.Root>
+      <DropdownMenu.Root open={opened} onOpenChange={setOpened}>
         <DropdownMenu.Trigger>
           <IconButton
             className="!m-0 !ml-2"
             size="2"
             variant={tool === 'add' ? 'solid' : 'ghost'}
           >
-            <Tooltip content="Add">
+            <Tooltip
+              content={(
+                <span className="flex items-center gap-2">
+                  <Text>Add</Text>
+                  <Kbd>A</Kbd>
+                </span>
+              )}
+            >
               <PlusIcon
                 width={20}
                 height={20}
@@ -81,6 +119,9 @@ const Toolbar = ({ className, onSelectTool, ...props }: ToolbarProps) => {
           </IconButton>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content sideOffset={20} align="center">
+          <DropdownMenu.Item onClick={onAddClick.bind(null, 'scene')}>
+            Scene
+          </DropdownMenu.Item>
           <DropdownMenu.Item onClick={onAddClick.bind(null, 'sensor')}>
             Sensor
           </DropdownMenu.Item>
@@ -95,7 +136,14 @@ const Toolbar = ({ className, onSelectTool, ...props }: ToolbarProps) => {
         variant={tool === 'collisions' ? 'solid' : 'ghost'}
         onClick={onSelectTool?.bind(null, 'collisions')}
       >
-        <Tooltip content="Collisions">
+        <Tooltip
+          content={(
+            <span className="flex items-center gap-2">
+              <Text>Collisions</Text>
+              <Kbd>C</Kbd>
+            </span>
+          )}
+        >
           <ComponentBooleanIcon
             width={20}
             height={20}

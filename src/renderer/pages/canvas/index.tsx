@@ -2,23 +2,30 @@ import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import {
   type MoveableState,
   type InfiniteCanvasRef,
+  type InfiniteCanvasCursorMode,
   InfiniteCanvas,
   classNames,
   mockState,
   useEventListener,
 } from '@junipero/react';
 import { Resizable } from 're-resizable';
+import { useHotkeys } from 'react-hotkeys-hook';
 
-import type { GameActor, GameScene, GameSensor, ToolType } from '../../../types';
+import type {
+  GameActor,
+  GameScene,
+  GameSensor,
+  ToolType,
+} from '../../../types';
 import { type CanvasContextType, CanvasContext } from '../../services/contexts';
 import { useApp } from '../../services/hooks';
-import Scene from '../../components/Scene';
+import Scene from './Scene';
 import Toolbar from './Toolbar';
 import TitleBar from './TitleBar';
 import Sidebar from './Sidebar';
 
 export interface CanvasProps {
-  onMoveScene: (scene: GameScene, e: MoveableState) => void;
+  onMoveScene: (scene: GameScene, e: Partial<MoveableState>) => void;
   onChange?: (scenes: GameScene[]) => void;
 }
 
@@ -38,8 +45,8 @@ const Canvas = ({
   const [state, dispatch] = useReducer(mockState<CanvasState>, {
     selectedScene: undefined,
     selectedItem: undefined,
-    tool: 'move',
-    previousTool: 'move',
+    tool: 'default',
+    previousTool: 'default',
   });
 
   const selectedScene = useMemo(() => (
@@ -49,16 +56,6 @@ const Canvas = ({
   useEffect(() => {
     infiniteCanvasRef.current?.fitIntoView(200);
   }, []);
-
-  // useEffect(() => {
-  //   const selectedScene = scenes.find(s => s === state.selectedScene);
-
-  //   console.log('Scenes updated, selectedScene=', selectedScene);
-
-  //   if (selectedScene) {
-  //     dispatch({ selectedScene });
-  //   }
-  // }, [scenes, state.selectedScene]);
 
   useEventListener('keydown', (e: KeyboardEvent) => {
     if (e.key === ' ' && state.tool !== 'pan') {
@@ -71,6 +68,16 @@ const Canvas = ({
       dispatch({ tool: state.previousTool });
     }
   }, [state.previousTool, state.tool]);
+
+  useHotkeys('delete, backspace', e => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (state.selectedScene) {
+      onChange?.(scenes.filter(s => s._file !== state.selectedScene));
+      dispatch({ selectedScene: undefined, selectedItem: undefined });
+    }
+  }, [state.selectedScene, scenes, onChange]);
 
   const onSelectScene = useCallback((scene?: GameScene) => {
     if (selectedScene === scene) {
@@ -97,6 +104,30 @@ const Canvas = ({
   const onSceneChange = useCallback((scene: GameScene) => {
     onChange?.(scenes.map(s => s._file === scene._file ? scene : s));
   }, [onChange, scenes]);
+
+  const onCanvasClick = useCallback(() => {
+    if (state.tool === 'add') {
+      const scene: GameScene = {
+        _file: `scene_${scenes.length + 1}.json`,
+        name: `Scene ${scenes.length + 1}`,
+        background: 'bg_default',
+        type: 'scene',
+        sceneType: 'logos',
+      };
+
+      onChange?.(scenes.concat(scene));
+
+      const position = infiniteCanvasRef.current
+        ?.getCursorPosition() || { x: 0, y: 0 };
+
+      onMoveScene(scene, {
+        deltaX: position.x,
+        deltaY: position.y,
+      });
+
+      dispatch({ tool: 'default', selectedScene: scene._file });
+    }
+  }, [state.tool, scenes]);
 
   const getContext = useCallback((): CanvasContextType => ({
     selectedScene,
@@ -138,11 +169,19 @@ const Canvas = ({
       >
         <InfiniteCanvas
           ref={infiniteCanvasRef}
-          cursorMode={state.tool === 'pan' ? 'pan' : 'default'}
+          cursorMode={
+            ['collisions'].includes(state.tool)
+              ? 'default'
+              : (state.tool || 'default') as InfiniteCanvasCursorMode
+          }
           className={classNames(
             'flex-auto overflow-hidden !bg-transparent',
-            { 'cursor-grab active:cursor-grabbing': state.tool === 'pan' },
+            {
+              'cursor-grab active:cursor-grabbing': state.tool === 'pan',
+              'cursor-copy': state.tool === 'add',
+            },
           )}
+          onClick={onCanvasClick}
         >
           <div className="flex items-start gap-8">
             { scenes.map(scene => (

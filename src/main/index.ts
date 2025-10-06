@@ -233,27 +233,63 @@ const getDataFiles = async (
   base: string,
   cond: (file: string) => boolean = () => true
 ) => {
-  return (await fs
-    .readdir(path.join(base, 'data')))
-    .filter(file => cond(file));
+  try {
+    return (await fs
+      .readdir(path.join(base, 'data')))
+      .filter(file => cond(file));
+  } catch {
+    return [];
+  }
+};
+
+const getSceneFiles = async (
+  base: string,
+) => {
+  return getDataFiles(
+    base,
+    file =>
+      file.startsWith('scene_') &&
+      file.endsWith('.json') &&
+      !file.endsWith('.map.json') &&
+      file !== 'scene_default.json'
+  );
+};
+
+const getMapFiles = (
+  base: string,
+) => {
+  return getDataFiles(
+    base,
+    file =>
+      file.startsWith('scene_') &&
+      file.endsWith('.map.json')
+  );
 };
 
 const getGraphicsFiles = async (
   base: string,
   cond: (file: string) => boolean = () => true
 ) => {
-  return (await fs
-    .readdir(path.join(base, 'graphics')))
-    .filter(file => cond(file));
+  try {
+    return (await fs
+      .readdir(path.join(base, 'graphics')))
+      .filter(file => cond(file));
+  } catch {
+    return [];
+  }
 };
 
 const getSoundFiles = async (
   base: string,
   cond: (file: string) => boolean = () => true
 ) => {
-  return (await fs
-    .readdir(path.join(base, 'audio')))
-    .filter(file => cond(file));
+  try {
+    return (await fs
+      .readdir(path.join(base, 'audio')))
+      .filter(file => cond(file));
+  } catch {
+    return [];
+  }
 };
 
 ipcMain.handle('load-project', async (event, projectPath: string) => {
@@ -272,7 +308,7 @@ ipcMain.handle('load-project', async (event, projectPath: string) => {
   win?.setProgressBar(current / total);
 
   // Save project to recent projects
-  storage.addRecentProject(projectPath, project);
+  storage.addToRecentProjects(projectPath, project);
 
   // Prepare variables
   const variableFiles = await getDataFiles(
@@ -407,6 +443,22 @@ ipcMain.handle('save-project', async (
     }
   }
 
+  // Delete obsolete scenes
+  const existingSceneFiles: string[] = ([] as string[])
+    .concat(await getSceneFiles(projectDir))
+    .concat(await getMapFiles(projectDir));
+
+  const newSceneFiles = (data.scenes || []).flatMap(s => [
+    s._file,
+    s.map?._file,
+  ]).filter(f => f) as string[];
+
+  for (const file of existingSceneFiles) {
+    if (!newSceneFiles.includes(file)) {
+      await fs.unlink(path.join(projectDir, 'data', file));
+    }
+  }
+
   // Save scenes
   for (const scene of data.scenes || []) {
     if (scene.map?._file) {
@@ -445,19 +497,19 @@ ipcMain.handle('create-project', async (event, opts: {
   path: string;
   name: string;
 }) => {
-  const projectDir = path.dirname(opts?.path || '');
+  const projectDir = path.resolve(opts?.path || '');
 
   await fs.mkdir(projectDir, { recursive: true });
 
   // Copy commons
   await fse.copy(
-    path.join(__dirname, '../templates/commons'),
+    path.join(__dirname, '../../public/templates/commons'),
     projectDir
   );
 
   // Copy template
   await fse.copy(
-    path.join(__dirname, `../templates/${opts.type}`),
+    path.join(__dirname, `../../public/templates/${opts.type}`),
     projectDir
   );
 
@@ -467,11 +519,11 @@ ipcMain.handle('create-project', async (event, opts: {
     scenes: [],
   };
 
-  const projectPath = path.join(opts.path, `${slugify(opts.name)}.gbasproj`);
+  const projectPath = path.join(projectDir, `${slugify(opts.name)}.gbasproj`);
   await fs.writeFile(projectPath,
     JSON.stringify(project, null, 2) + '\n', 'utf-8');
 
-  storage.addRecentProject(projectPath, project);
+  storage.addToRecentProjects(projectPath, project);
 
   // Close selection window
   const win = BrowserWindow.fromWebContents(event.sender);

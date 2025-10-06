@@ -114,7 +114,7 @@ const Scene = ({
       transformScale={zoom}
       x={sceneConfig?.x || 0}
       y={sceneConfig?.y || 0}
-      disabled={tool !== 'move' || selectedScene !== scene || !!selectedItem}
+      disabled={tool !== 'default' || selectedScene !== scene || !!selectedItem}
     >
       <div
         className={classNames(
@@ -158,7 +158,7 @@ const Scene = ({
             <Moveable
               key={i}
               transformScale={zoom}
-              disabled={tool !== 'move' || selectedItem !== sensor}
+              disabled={tool !== 'default' || selectedItem !== sensor}
               x={tileToPixel(sensor.x || 0, gridSize)}
               y={tileToPixel(sensor.y || 0, gridSize)}
               onMouseDown={e => e.stopPropagation()}
