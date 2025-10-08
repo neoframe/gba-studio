@@ -21,7 +21,7 @@ const TitleBar = ({
       <Card
         className={classNames(
           '!rounded-[20px] before:!rounded-[20px] after:!rounded-[20px]',
-          'h-[48px] app-drag pointer-events-auto',
+          'h-[48px] pointer-events-auto',
         )}
       >
         <div className="text-center">

@@ -143,7 +143,15 @@ const Canvas = ({
           'flex items-stretch',
         )}
       >
-        <ProjectSidebar />
+        <div
+          className={classNames(
+            'fixed top-0 left-0 w-screen h-[15px] app-drag',
+            'pointer-events-auto'
+          )}
+        />
+        <ProjectSidebar
+          onSelectScene={onSelectScene}
+        />
         <TitleBar />
         <EditSidebar
           onSceneChange={onSceneChange}

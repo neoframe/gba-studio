@@ -5737,6 +5737,7 @@ __metadata:
     electron-window-corner-addon: "npm:0.1.1"
     eslint: "npm:9.36.0"
     fs-extra: "npm:11.3.2"
+    radix-ui: "npm:1.4.3"
     re-resizable: "npm:6.11.2"
     react: "npm:19.2.0"
     react-dom: "npm:19.2.0"
@@ -7935,7 +7936,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"radix-ui@npm:^1.1.3":
+"radix-ui@npm:1.4.3, radix-ui@npm:^1.1.3":
   version: 1.4.3
   resolution: "radix-ui@npm:1.4.3"
   dependencies:
