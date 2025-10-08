@@ -64,7 +64,7 @@ const CollapsibleTrigger = ({
         )}
       >
         { open ? <CaretDownIcon /> : <CaretRightIcon /> }
-        <div>{ children }</div>
+        <div className="flex-auto">{ children }</div>
       </div>
     </RadixCollapsible.Trigger>
   );
@@ -75,7 +75,7 @@ const CollapsibleContent = ({
   ...rest
 }: RadixCollapsible.CollapsibleContentProps) => (
   <RadixCollapsible.Content
-    className={classNames('px-3 pb-2', className)}
+    className={classNames('pb-2', className)}
     { ...rest }
   />
 );

@@ -1,26 +1,41 @@
-import { useCallback, useEffect, useState } from 'react';
+import {
+  type ChangeEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { classNames, useEventListener } from '@junipero/react';
-import { ListBulletIcon, PlayIcon } from '@radix-ui/react-icons';
+import {
+  ListBulletIcon,
+  PlayIcon,
+  PlusCircledIcon,
+  StackIcon,
+} from '@radix-ui/react-icons';
 import { Card, IconButton, Inset, Text } from '@radix-ui/themes';
 import { type ResizableProps, Resizable } from 're-resizable';
 
-import type { GameScene } from '../../../types';
-import { useApp } from '../../services/hooks';
+import type { GameScene, GameVariables } from '../../../types';
+import { useApp, useCanvas } from '../../services/hooks';
 import Collapsible from '../../components/Collapsible';
 
 export interface ProjectSidebarProps extends ResizableProps {
   onSelectScene: (scene: GameScene) => void;
+  onVariablesChange: (registry: GameVariables) => void;
 }
 
 const ProjectSidebar = ({
   className,
   onSelectScene,
+  onVariablesChange,
   ...rest
 }: ProjectSidebarProps) => {
   const [opened, setOpened] = useState(true);
   const [width, setWidth] = useState(300);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const { scenes, variables } = useApp();
+  const { selectedScene } = useCanvas();
 
   const checkFullscreen = useCallback(async () => {
     setIsFullScreen(await window.electron.isFullscreen());
@@ -37,6 +52,84 @@ const ProjectSidebar = ({
   const toggle = () => {
     setOpened(o => !o);
   };
+
+  const onVariableNameKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.currentTarget.blur();
+    }
+  };
+
+  const onVariableNameChange = useCallback((
+    registry: GameVariables,
+    oldName: string,
+    e: ChangeEvent<HTMLDivElement>
+  ) => {
+    const name = e.currentTarget.textContent
+      .trim().slice(0, 32);
+
+    if (name === oldName) {
+      return;
+    }
+
+    if (!name) {
+      // Remove variable
+      const { [oldName]: _, ...rest } = registry.values;
+      onVariablesChange?.({
+        ...registry,
+        values: rest,
+      });
+
+      return;
+    }
+
+    onVariablesChange?.({
+      ...registry,
+      values: Object
+        .fromEntries(Object.entries(registry.values).map(([k, v]) => (
+          k === oldName ? [name, v] : [k, v]
+        ))),
+    });
+  }, [onVariablesChange]);
+
+  const onAddVariable = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    if (!variables.length) {
+      variables.push({ _file: 'variables.json', values: {} });
+    }
+
+    const latestRegistry = variables[variables.length - 1];
+    const name = 'Variable_' +
+      Object.keys(latestRegistry?.values || {}).length;
+    onVariablesChange?.({
+      ...latestRegistry,
+      values: {
+        ...latestRegistry?.values,
+        [name]: 0,
+      },
+    });
+
+    // Focus the new variable
+    setTimeout(() => {
+      const varEl = document.querySelector(
+        `[data-variable="${name}"] [contenteditable]`
+      ) as HTMLDivElement | undefined;
+
+      if (varEl) {
+        varEl.focus();
+
+        const range = document.createRange();
+        range.selectNodeContents(varEl);
+
+        const sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+      }
+    }, 10);
+  }, [variables, onVariablesChange]);
 
   return (
     <>
@@ -104,10 +197,19 @@ const ProjectSidebar = ({
                     <a
                       key={scene._file}
                       href="#"
-                      className="block"
+                      className={classNames(
+                        'flex items-center gap-2 px-3 py-1',
+                        { 'bg-(--accent-9)': selectedScene === scene },
+                      )}
                       onClick={onSelectScene.bind(null, scene)}
                     >
-                      { scene.name }
+                      <StackIcon
+                        className={classNames(
+                          '[&_path]:fill-(--accent-9)',
+                          { '[&_path]:fill-seashell': selectedScene === scene },
+                        )}
+                      />
+                      <Text>{ scene.name }</Text>
                     </a>
                   )) }
                 </Collapsible.Content>
@@ -115,12 +217,46 @@ const ProjectSidebar = ({
 
               <Collapsible.Root>
                 <Collapsible.Trigger>
-                  <Text>Variables</Text>
+                  <div className="flex items-center justify-between w-full">
+                    <Text>Variables</Text>
+                    <IconButton
+                      variant="ghost"
+                      radius="full"
+                      onClick={onAddVariable}
+                    >
+                      <PlusCircledIcon
+                        width={16}
+                        height={16}
+                      />
+                    </IconButton>
+                  </div>
                 </Collapsible.Trigger>
                 <Collapsible.Content>
-                  { variables.map(v => Object.keys(v.values)).flat().map(v => (
-                    <div key={v}>{ v }</div>
-                  ))}
+                  { variables.map(registry => (
+                    Object.keys(registry?.values || {}).map(v => (
+                      <div
+                        key={v}
+                        className="px-3 flex items-center gap-2 py-1"
+                        data-variable={v}
+                      >
+                        <Text className="text-(--accent-9) cursor-default">
+                          $
+                        </Text>
+                        <div
+                          contentEditable
+                          suppressContentEditableWarning
+                          className={classNames(
+                            'whitespace-nowrap flex-auto overflow-scroll',
+                            'outline-(--accent-9) rounded-xs focus:outline-2',
+                          )}
+                          onKeyDown={onVariableNameKeyDown}
+                          onBlur={onVariableNameChange.bind(null, registry, v)}
+                        >
+                          { v }
+                        </div>
+                      </div>
+                    ))
+                  )) }
                 </Collapsible.Content>
               </Collapsible.Root>
             </Inset>

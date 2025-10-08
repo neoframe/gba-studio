@@ -314,7 +314,7 @@ ipcMain.handle('load-project', async (event, projectPath: string) => {
   const variableFiles = await getDataFiles(
     projectDir,
     file =>
-      file.startsWith('variables_') &&
+      file.startsWith('variables') &&
       file.endsWith('.json') &&
       file !== 'variables_default.json'
   );

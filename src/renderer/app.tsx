@@ -187,10 +187,10 @@ const App = () => {
     });
   }, [addToHistory]);
 
-  const onCanvasChange = useCallback((scenes: GameScene[]) => {
+  const onCanvasChange = useCallback((payload: Partial<AppPayload>) => {
     dispatch(s => ({
       ...s,
-      scenes,
+      ...payload,
       history: addToHistory(s),
       historyIndex: 0,
       dirty: true,

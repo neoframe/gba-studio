@@ -11,9 +11,11 @@ import {
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import type {
+  AppPayload,
   GameActor,
   GameScene,
   GameSensor,
+  GameVariables,
   ToolType,
 } from '../../../types';
 import { type CanvasContextType, CanvasContext } from '../../services/contexts';
@@ -26,7 +28,7 @@ import ProjectSidebar from './ProjectSidebar';
 
 export interface CanvasProps {
   onMoveScene: (scene: GameScene, e: Partial<MoveableState>) => void;
-  onChange?: (scenes: GameScene[]) => void;
+  onChange?: (payload: Partial<AppPayload>) => void;
 }
 
 export interface CanvasState {
@@ -41,7 +43,7 @@ const Canvas = ({
   onChange,
 }: CanvasProps) => {
   const infiniteCanvasRef = useRef<InfiniteCanvasRef>(null);
-  const { scenes } = useApp();
+  const appPayload = useApp();
   const [state, dispatch] = useReducer(mockState<CanvasState>, {
     selectedScene: undefined,
     selectedItem: undefined,
@@ -50,8 +52,8 @@ const Canvas = ({
   });
 
   const selectedScene = useMemo(() => (
-    scenes.find(s => s._file === state.selectedScene)
-  ), [scenes, state.selectedScene]);
+    appPayload.scenes.find(s => s._file === state.selectedScene)
+  ), [appPayload.scenes, state.selectedScene]);
 
   useEffect(() => {
     infiniteCanvasRef.current?.fitIntoView(200);
@@ -74,10 +76,13 @@ const Canvas = ({
     e.stopPropagation();
 
     if (state.selectedScene) {
-      onChange?.(scenes.filter(s => s._file !== state.selectedScene));
+      onChange?.({
+        ...appPayload,
+        scenes: appPayload.scenes.filter(s => s._file !== state.selectedScene),
+      });
       dispatch({ selectedScene: undefined, selectedItem: undefined });
     }
-  }, [state.selectedScene, scenes, onChange]);
+  }, [state.selectedScene, appPayload, onChange]);
 
   const onSelectScene = useCallback((scene?: GameScene) => {
     if (selectedScene === scene) {
@@ -102,20 +107,26 @@ const Canvas = ({
   }, []);
 
   const onSceneChange = useCallback((scene: GameScene) => {
-    onChange?.(scenes.map(s => s._file === scene._file ? scene : s));
-  }, [onChange, scenes]);
+    onChange?.({
+      ...appPayload,
+      scenes: appPayload.scenes.map(s => s._file === scene._file ? scene : s),
+    });
+  }, [onChange, appPayload.scenes]);
 
   const onCanvasClick = useCallback(() => {
     if (state.tool === 'add') {
       const scene: GameScene = {
-        _file: `scene_${scenes.length + 1}.json`,
-        name: `Scene ${scenes.length + 1}`,
+        _file: `scene_${appPayload.scenes.length + 1}.json`,
+        name: `Scene ${appPayload.scenes.length + 1}`,
         background: 'bg_default',
         type: 'scene',
         sceneType: 'logos',
       };
 
-      onChange?.(scenes.concat(scene));
+      onChange?.({
+        ...appPayload,
+        scenes: [...appPayload.scenes, scene],
+      });
 
       const position = infiniteCanvasRef.current
         ?.getCursorPosition() || { x: 0, y: 0 };
@@ -127,7 +138,15 @@ const Canvas = ({
 
       dispatch({ tool: 'default', selectedScene: scene._file });
     }
-  }, [state.tool, scenes]);
+  }, [state.tool, appPayload]);
+
+  const onVariablesChange = useCallback((registry: GameVariables) => {
+    onChange?.({
+      ...appPayload,
+      variables: appPayload
+        .variables.map(v => v._file === registry._file ? registry : v),
+    });
+  }, [onChange, appPayload]);
 
   const getContext = useCallback((): CanvasContextType => ({
     selectedScene,
@@ -151,6 +170,7 @@ const Canvas = ({
         />
         <ProjectSidebar
           onSelectScene={onSelectScene}
+          onVariablesChange={onVariablesChange}
         />
         <TitleBar />
         <EditSidebar
@@ -180,7 +200,7 @@ const Canvas = ({
           onClick={onCanvasClick}
         >
           <div className="flex items-start gap-8">
-            { scenes.map(scene => (
+            { appPayload.scenes.map(scene => (
               <Scene
                 key={scene.name}
                 scene={scene}
@@ -189,7 +209,7 @@ const Canvas = ({
                 onMove={onMoveScene}
                 onChange={onSceneChange}
               />
-            ))}
+            )) }
           </div>
         </InfiniteCanvas>
 
