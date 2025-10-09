@@ -367,7 +367,8 @@ ipcMain.handle('load-project', async (event, projectPath: string) => {
   for (const file of variableFiles) {
     const registry = JSON
       .parse(await fs.readFile(path.join(projectDir, 'data', file), 'utf-8'));
-    variables.push({ _file: file, values: registry });
+    registry._file = file;
+    variables.push(registry);
   }
 
   current++;
@@ -469,7 +470,7 @@ ipcMain.handle('save-project', async (
       delete variableSet._file;
 
       await fs.writeFile(path.join(projectDir, 'data', fileName),
-        JSON.stringify(variableSet.values, null, 2) + '\n', 'utf-8');
+        JSON.stringify(variableSet, null, 2) + '\n', 'utf-8');
     }
   }
 

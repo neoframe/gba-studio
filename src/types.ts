@@ -29,8 +29,10 @@ export interface ListCategory<T extends ListItem = ListItem> {
 }
 
 export interface GameVariables {
+  type: 'variables';
   values: Record<string, VariableValue>;
   // Internals
+  id?: string;
   _file?: string;
 }
 

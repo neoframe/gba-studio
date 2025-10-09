@@ -109,7 +109,12 @@ const ProjectSidebar = ({
     e.stopPropagation();
 
     if (!variables.length) {
-      variables.push({ _file: 'variables.json', values: {} });
+      variables.push({
+        _file: 'variables.json',
+        type: 'variables',
+        id: uuid(),
+        values: {},
+      });
     }
 
     const latestRegistry = variables[variables.length - 1];
