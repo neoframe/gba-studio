@@ -12,6 +12,8 @@ import type {
 import { createProjectWindow } from '../windows';
 import Storage from '../storage';
 
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
 export default async (storage: Storage, event: IpcMainInvokeEvent, opts: {
   type: ProjectTemplate;
   path: string;

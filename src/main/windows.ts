@@ -3,6 +3,8 @@ import url from 'node:url';
 
 import { net, session, BrowserWindow, nativeTheme } from 'electron';
 
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
 export const createSelectionWindow = async () => {
   const {
     WindowCorner,
