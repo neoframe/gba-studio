@@ -377,7 +377,7 @@ namespace neo
         if (name == music_evt->music_name && !bn::music::playing())
         {
           BN_LOG("Playing music: ", name);
-          item.play(music_evt->volume, music_evt->loop);
+          item.play(music_evt->volume / 100, music_evt->loop);
 
           break;
         }
@@ -414,9 +414,9 @@ namespace neo
 
           item.play_with_priority(
             sound_evt->priority,
-            sound_evt->volume,
+            sound_evt->volume / 100,
             sound_evt->speed,
-            sound_evt->panning
+            sound_evt->panning / 100
           );
 
           break;

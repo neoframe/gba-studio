@@ -65,7 +65,6 @@
       ]
     },
     "Scene": {
-      "additionalProperties": false,
       "properties": {
         "$schema": {
           "type": "string"
@@ -392,7 +391,6 @@
       "type": "object"
     },
     "SceneStopMusicEvent": {
-      "additionalProperties": false,
       "properties": {
         "type": {
           "const": "stop-music",
@@ -405,22 +403,29 @@
       "type": "object"
     },
     "ScenePlaySoundEvent": {
-      "additionalProperties": false,
       "properties": {
         "name": {
           "type": "string"
         },
         "volume": {
-          "type": "number"
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
         },
         "speed": {
-          "type": "number"
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
         },
         "panning": {
-          "type": "number"
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
         },
         "priority": {
-          "type": "number"
+          "type": "number",
+          "minimum": -32767,
+          "maximum": 32767
         },
         "type": {
           "const": "play-sound",
@@ -481,7 +486,6 @@
         "sensors": {
           "type": "array",
           "items": {
-            "additionalProperties": false,
             "properties": {
               "type": {
                 "const": "sensor",
