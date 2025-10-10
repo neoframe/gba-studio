@@ -10,7 +10,7 @@ export const createSelectionWindow = async () => {
     WindowCorner,
     VibrancyMaterial,
     EffectState,
-  } = await import('electron-window-corner-addon');
+  } = await import('@neoframe/electron-window-corner-addon');
 
   const win = new BrowserWindow({
     width: 720,
@@ -62,7 +62,7 @@ export const createProjectWindow = async (projectPath: string) => {
     WindowCorner,
     VibrancyMaterial,
     EffectState,
-  } = await import('electron-window-corner-addon');
+  } = await import('@neoframe/electron-window-corner-addon');
 
   const projectName = path.basename(projectPath, '.gbasproj');
   const ses = session.fromPartition(projectName);
