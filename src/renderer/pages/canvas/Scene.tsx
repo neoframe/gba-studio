@@ -128,7 +128,7 @@ const Scene = ({
   }, [onSelectItem, scene]);
 
   const getSprite = useCallback((name: string) => (
-    sprites?.find(s => s._file === `sprite_${name}.json`)
+    sprites?.find(s => s._file === `${name}.json`)
   ), [sprites]);
 
   return (

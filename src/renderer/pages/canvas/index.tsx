@@ -117,6 +117,23 @@ const Canvas = ({
       return;
     }
 
+    if (state.selectedItem?.type === 'actor') {
+      set(selectedScene, 'actors',
+        selectedScene?.actors
+          ?.filter(a => a !== state.selectedItem) || []);
+      onChange?.({
+        ...appPayload,
+        scenes: appPayload.scenes.map(s => (
+          s.id === selectedScene?.id ||
+          s._file === selectedScene?._file
+            ? selectedScene! : s
+        )),
+      });
+      dispatch({ selectedItem: undefined });
+
+      return;
+    }
+
     if (state.selectedScene) {
       onChange?.({
         ...appPayload,

@@ -36,6 +36,8 @@ export const sanitizeActor = (actor: GameActor): GameActor => {
     actor.id = randomUUID();
   }
 
+  actor.width = Number(actor.width ?? 1);
+  actor.height = Number(actor.height ?? 1);
   actor.events?.init?.forEach(event => sanitizeEvent(event));
   actor.events?.interact?.forEach(event => sanitizeEvent(event));
   actor.events?.update?.forEach(event => sanitizeEvent(event));
@@ -48,6 +50,8 @@ export const sanitizeSensor = (sensor: GameSensor): GameSensor => {
     sensor.id = randomUUID();
   }
 
+  sensor.width = Number(sensor.width ?? 1);
+  sensor.height = Number(sensor.height ?? 1);
   sensor.events?.forEach(event => sanitizeEvent(event));
 
   return sensor;
