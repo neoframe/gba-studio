@@ -13,10 +13,6 @@ export default async (
 ) => {
   const projectDir = path.dirname(projectPath);
 
-  // Save project config
-  await fs.writeFile(projectPath,
-    JSON.stringify(data.project || {}, null, 2) + '\n', 'utf-8');
-
   // Save variables
   for (const variableSet of data.variables || []) {
     if (variableSet._file) {
@@ -73,4 +69,8 @@ export default async (
         JSON.stringify(script, null, 2) + '\n', 'utf-8');
     }
   }
+
+  // Save project config
+  await fs.writeFile(projectPath,
+    JSON.stringify(data.project || {}, null, 2) + '\n', 'utf-8');
 };

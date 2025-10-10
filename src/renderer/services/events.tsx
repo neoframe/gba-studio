@@ -16,7 +16,15 @@ import {
   StopIcon,
 } from '@radix-ui/react-icons';
 
-import type { ListCategory, ListItem } from '../../types';
+import type {
+  ExecuteScriptEvent,
+  GameScript,
+  IfEvent,
+  ListCategory,
+  ListItem,
+  OnButtonPressEvent,
+  SceneEvent,
+} from '../../types';
 
 export interface EventDefinition extends ListItem {
   construct?: (params?: any) => any;
@@ -162,3 +170,40 @@ export const getEventDefinition = (type: string): EventDefinition =>
     value: 'unknown',
     name: 'Unknown Event',
   } as ListItem;
+
+export const getEventsOfType = <T extends SceneEvent>(
+  type: string,
+  events: SceneEvent[],
+  opts?: {
+    scripts?: GameScript[];
+  },
+): T[] => (
+  events.reduce((acc, event) => {
+    if (event.type === type) {
+      acc.push(event as T);
+    }
+
+    if (event.type === 'if') {
+      const evt = event as IfEvent;
+      acc.push(...getEventsOfType<T>(type, evt.then || []));
+      acc.push(...getEventsOfType<T>(type, evt.else || []));
+    }
+
+    if (event.type === 'on-button-press') {
+      const evt = event as OnButtonPressEvent;
+      acc.push(...getEventsOfType<T>(type, evt.events || []));
+    }
+
+    if (event.type === 'execute-script' && opts?.scripts) {
+      const evt = event as ExecuteScriptEvent;
+      const script = opts.scripts
+        .find(s => s.id === evt.script || s._file === evt.script);
+
+      if (script) {
+        acc.push(...getEventsOfType<T>(type, script.events || [], opts));
+      }
+    }
+
+    return acc;
+  }, [] as T[])
+);

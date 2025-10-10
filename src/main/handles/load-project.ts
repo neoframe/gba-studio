@@ -12,7 +12,7 @@ import type {
   GameScript,
   GameBackground,
 } from '../../types';
-import { sanitizeScene, sanitizeScript } from '../sanitize';
+import { sanitizeProject, sanitizeScene, sanitizeScript } from '../sanitize';
 import {
   getGraphicsFiles,
   getSceneFiles,
@@ -34,15 +34,6 @@ export default async (
 
   let current = 0;
   let total = 1;
-
-  // Load project config
-  const project: GameProject = JSON.parse(await fs
-    .readFile(projectPath, 'utf-8'));
-  current++;
-  win?.setProgressBar(current / total);
-
-  // Save project to recent projects
-  storage.addToRecentProjects(projectPath, project);
 
   // Prepare variables
   const variableFiles = await getVariableFiles(projectDir);
@@ -155,6 +146,18 @@ export default async (
     scripts.push(sanitizeScript(script));
   }
 
+  // Load project config
+  const project: GameProject = sanitizeProject(
+    JSON.parse(await fs.readFile(projectPath, 'utf-8')),
+    { scenes }
+  );
+  current++;
+
+  // Save project to recent projects
+  storage.addToRecentProjects(projectPath, project);
+  win?.setProgressBar(current / total);
+
+  // Reset progress
   win?.setProgressBar(-1);
 
   const payload: AppPayload = {

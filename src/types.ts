@@ -47,11 +47,21 @@ export interface GameMap {
   sensors: GameSensor[];
 }
 
+export interface GamePlayer {
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  direction?: Direction;
+  sprite: string;
+}
+
 export interface GameScene {
   type: 'scene';
   sceneType: 'logos' | '2d-top-down';
   name: string;
   background?: string;
+  player?: GamePlayer;
   map?: GameMap;
   events?: SceneEvent[];
   actors?: GameActor[];
@@ -103,7 +113,7 @@ export interface ProjectSceneData {
   x: number;
   y: number;
   // Internals
-  id: string;
+  id?: string;
   _file?: string;
 }
 

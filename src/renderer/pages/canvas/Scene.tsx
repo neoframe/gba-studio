@@ -93,10 +93,6 @@ const Scene = ({
     onSelect?.(scene);
   }, [onSelect, scene, selectedScene]);
 
-  const onMovedScene = useCallback((e: MoveableState) => {
-    onMove?.(scene, e);
-  }, [onChange, scene]);
-
   const onMovedSensor = useCallback((sensor: GameSensor, e: MoveableState) => {
     sensor.x = pixelToTile(e.deltaX, gridSize);
     sensor.y = pixelToTile(e.deltaY, gridSize);
@@ -127,6 +123,14 @@ const Scene = ({
     onSelectItem?.(scene, actor);
   }, [onSelectItem, scene]);
 
+  const onMovedPlayer = useCallback((e: MoveableState) => {
+    scene.player = scene.player || { x: 0, y: 0, sprite: 'sprite_default' };
+
+    scene.player.x = pixelToTile(e.deltaX, gridSize);
+    scene.player.y = pixelToTile(e.deltaY, gridSize);
+    onChange?.(scene);
+  }, [onChange, scene, gridSize]);
+
   const getSprite = useCallback((name: string) => (
     sprites?.find(s => s._file === `${name}.json`)
   ), [sprites]);
@@ -134,15 +138,16 @@ const Scene = ({
   return (
     <Moveable
       onMouseDown={onSelect_}
-      onMoveEnd={onMovedScene}
+      onMove={onMove?.bind(null, scene)}
       transformScale={zoom}
+      strategy="position"
       x={sceneConfig?.x || 0}
       y={sceneConfig?.y || 0}
       disabled={tool !== 'default' || selectedScene !== scene || !!selectedItem}
     >
       <div
         className={classNames(
-          'relative select-none',
+          '!absolute select-none',
           { 'z-100' : selectedScene === scene },
         )}
       >
@@ -250,6 +255,45 @@ const Scene = ({
             </Moveable>
           )) }
 
+          { scene.sceneType === '2d-top-down' && scene.player && (
+            <Moveable
+              transformScale={zoom}
+              x={tileToPixel(scene.player.x || 0, gridSize)}
+              y={tileToPixel(scene.player.y || 0, gridSize)}
+              onMouseDown={e => e.stopPropagation()}
+              onMoveEnd={onMovedPlayer}
+              step={gridSize}
+              style={{
+                left: 0,
+                top: 0,
+                width: scene.player.width
+                  ? tileToPixel(scene.player.width, gridSize)
+                  : getSprite(scene.player.sprite)?.width ?? gridSize,
+                height: scene.player.height
+                  ? tileToPixel(scene.player.height, gridSize)
+                  : getSprite(scene.player.sprite)?.height ?? gridSize,
+              }}
+            >
+              <div className="absolute w-full h-full">
+                <div className="relative w-full h-full">
+                  <div
+                    className={classNames(
+                      'absolute bg-blue-500/50 border-2 border-blue-500',
+                      'z-2 w-full h-full top-0 left-0',
+                    )}
+                  />
+                  <Sprite
+                    className="absolute z-1 top-0 left-0"
+                    sprite={getSprite(scene.player.sprite)}
+                    width={scene.player.width}
+                    height={scene.player.height}
+                    direction={scene.player.direction}
+                    gridSize={gridSize}
+                  />
+                </div>
+              </div>
+            </Moveable>
+          ) }
         </Card>
         <span className="absolute block w-full left-0 bottom-full text-center">
           { scene.name }

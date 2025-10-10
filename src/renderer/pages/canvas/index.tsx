@@ -28,6 +28,7 @@ import Toolbar from './Toolbar';
 import TitleBar from './TitleBar';
 import EditSidebar from './EditSidebar';
 import ProjectSidebar from './ProjectSidebar';
+import Arrows from './Arrows';
 
 export interface CanvasProps {
   onMoveScene: (scene: GameScene, e: Partial<MoveableState>) => void;
@@ -295,7 +296,7 @@ const Canvas = ({
           )}
           onClick={onCanvasClick}
         >
-          <div className="flex items-start gap-8">
+          <div className="relative flex items-start gap-8">
             { appPayload.scenes.map(scene => (
               <Scene
                 key={scene.name}
@@ -306,6 +307,8 @@ const Canvas = ({
                 onChange={onSceneChange}
               />
             )) }
+
+            <Arrows />
           </div>
         </InfiniteCanvas>
 

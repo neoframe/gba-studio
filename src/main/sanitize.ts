@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type {
   GameActor,
+  GameProject,
   GameScene,
   GameScript,
   GameSensor,
@@ -77,4 +78,22 @@ export const sanitizeScript = (script: GameScript): GameScript => {
   script.events?.forEach(event => sanitizeEvent(event));
 
   return script;
+};
+
+export const sanitizeProject = (project: GameProject, opts?: {
+  scenes: GameScene[];
+}): GameProject => {
+  if (!project.scenes) {
+    project.scenes = [];
+  }
+
+  project.scenes = project.scenes.map(sceneData => {
+    if (!sceneData.id) {
+      sceneData.id = opts?.scenes?.find(s => s._file === sceneData._file)?.id;
+    }
+
+    return sceneData;
+  });
+
+  return project;
 };
