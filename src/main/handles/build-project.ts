@@ -56,6 +56,48 @@ function sendAbort (
   });
 }
 
+function runCommand (
+  command: string,
+  args: string[],
+  opts?: {
+    cwd?: string;
+    event?: IpcMainInvokeEvent;
+    build?: Build;
+  }
+) {
+  return new Promise<void>((resolve, reject) => {
+    const process = spawn(command, args, {
+      cwd: opts?.cwd,
+      stdio: 'inherit',
+    });
+
+    process.stdout?.on('data', data => {
+      if (opts?.event && opts?.build) {
+        sendLog(opts.event, opts.build.id, data.toString());
+      }
+    });
+
+    process.stderr?.on('data', data => {
+      if (opts?.event && opts?.build) {
+        sendError(opts.event, opts.build.id, data.toString());
+      }
+    });
+
+    opts?.build?.controller.signal.addEventListener('abort', () => {
+      process.kill();
+      reject(new Error(`${command} process aborted`));
+    });
+
+    process.on('close', code => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`${command} process exited with code ${code}`));
+      }
+    });
+  });
+}
+
 async function checkButano (event: IpcMainInvokeEvent, build: Build) {
   if (build.controller.signal.aborted) {
     return;
@@ -95,32 +137,10 @@ async function checkJsDependencies (event: IpcMainInvokeEvent, build: Build) {
 
   sendStep(event, build.id, 'Checking project dependencies...');
 
-  const process = spawn('yarn', ['install'], {
+  await runCommand('yarn', ['install'], {
     cwd: path.dirname(build.projectPath),
-    stdio: 'inherit',
-  });
-
-  process.stdout?.on('data', data => {
-    sendLog(event, build.id, data.toString());
-  });
-
-  process.stderr?.on('data', data => {
-    sendError(event, build.id, data.toString());
-  });
-
-  await new Promise<void>((resolve, reject) => {
-    build.controller.signal.addEventListener('abort', () => {
-      process.kill();
-      reject(new Error('Dependency installation aborted'));
-    });
-
-    process.on('close', code => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`Dependency installation exited with code ${code}`));
-      }
-    });
+    event,
+    build,
   });
 }
 
@@ -166,33 +186,10 @@ async function buildProject (event: IpcMainInvokeEvent, build: Build) {
   }
 
   sendStep(event, build.id, 'Building project...');
-
-  const process = spawn('make', [], {
+  await runCommand('make', [], {
     cwd: path.dirname(build.projectPath),
-    stdio: 'inherit',
-  });
-
-  process.stdout?.on('data', data => {
-    sendLog(event, build.id, data.toString());
-  });
-
-  process.stderr?.on('data', data => {
-    sendError(event, build.id, data.toString());
-  });
-
-  await new Promise<void>((resolve, reject) => {
-    build.controller.signal.addEventListener('abort', () => {
-      process.kill();
-      reject(new Error('Build process aborted'));
-    });
-
-    process.on('close', code => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`Build process exited with code ${code}`));
-      }
-    });
+    event,
+    build,
   });
 
   // Check for built .gba file
