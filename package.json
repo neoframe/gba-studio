@@ -2,7 +2,7 @@
   "name": "gba-studio",
   "productName": "GBA Studio",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "GB Studio, but worse & for the GBA",
   "main": ".vite/build/main.js",
   "workspaces": [
