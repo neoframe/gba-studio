@@ -9,10 +9,9 @@ import type {
   GameProject,
   ProjectTemplate,
 } from '../../types';
+import { getResourcesDir } from '../utils';
 import { createProjectWindow } from '../windows';
 import Storage from '../storage';
-
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 export default async (storage: Storage, event: IpcMainInvokeEvent, opts: {
   type: ProjectTemplate;
@@ -25,13 +24,13 @@ export default async (storage: Storage, event: IpcMainInvokeEvent, opts: {
 
   // Copy commons
   await fse.copy(
-    path.join(__dirname, '../../public/templates/commons'),
+    path.join(getResourcesDir(), './public/templates/commons'),
     projectDir
   );
 
   // Copy template
   await fse.copy(
-    path.join(__dirname, `../../public/templates/${opts.type}`),
+    path.join(getResourcesDir(), `./public/templates/${opts.type}`),
     projectDir
   );
 

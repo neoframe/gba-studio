@@ -25,6 +25,10 @@ const TitleBar = ({
     setStep(message);
   }, []);
 
+  useBridgeListener('build-aborted', () => {
+    setStep('');
+  }, []);
+
   return (
     <div
       { ...rest }

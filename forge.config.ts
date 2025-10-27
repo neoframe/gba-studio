@@ -4,13 +4,48 @@ import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
 import { VitePlugin } from '@electron-forge/plugin-vite';
+import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
+
+import 'dotenv/config';
+import removeLocalesPlugin from './.plugins/remove-locales';
 
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
-    icon: './images/icon',
+    icon: './images/AppIcon',
+    extraResource: [
+      './public',
+    ],
+    ...process.env.SIGN_ENABLED === 'true' && {
+      osxSign: {
+        type: 'distribution',
+        identity: process.env.SIGN_IDENTITY,
+        optionsForFile: (f: string) => {
+          if (f.includes('GBA Studio.app')) {
+            return {
+              entitlements: './src/entitlements.plist',
+              'hardened-runtime': true,
+            };
+          }
+
+          return { 'hardened-runtime': true };
+        },
+      },
+    },
+    afterCopy: [removeLocalesPlugin],
+    // ignore: [],
+    // ignore: (file: string) => {
+    //   if (!file) {
+    //     return false;
+    //   }
+
+    //   const keep = file.startsWith('/.vite') ||
+    //     file.includes('electron-window-corner-addon');
+
+    //   return !keep;
+    // },
   },
   rebuildConfig: {},
   makers: [
@@ -20,6 +55,7 @@ const config: ForgeConfig = {
     new MakerDeb({}),
   ],
   plugins: [
+    new AutoUnpackNativesPlugin({}),
     new VitePlugin({
       // `build` can specify multiple entry builds, which can be Main process,
       // Preload scripts, Worker process, etc.

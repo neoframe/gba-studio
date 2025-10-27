@@ -12,7 +12,7 @@ import {
 import { Card, IconButton, Inset, ScrollArea, Tabs, Text, Tooltip } from '@radix-ui/themes';
 import { type ResizableProps, Resizable } from 're-resizable';
 
-import { useApp, useEditor } from '../../services/hooks';
+import { useApp, useBridgeListener, useEditor } from '../../services/hooks';
 import views from '../../views';
 
 export interface LeftSidebarProps extends ResizableProps {}
@@ -23,7 +23,17 @@ const LeftSidebar = ({
   ...rest
 }: LeftSidebarProps) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const { projectPath, building, setBuilding } = useApp();
+  const {
+    projectPath,
+    building,
+    dirty,
+    project,
+    scenes,
+    variables,
+    scripts,
+    save,
+    setBuilding,
+  } = useApp();
   const {
     view,
     leftSidebarOpened,
@@ -52,9 +62,18 @@ const LeftSidebar = ({
       return;
     }
 
+    if (dirty) {
+      await save();
+    }
+
     setBuilding(true);
-    await window.electron.startBuildProject(projectPath);
-  }, [building, setBuilding]);
+    await window.electron.startBuildProject(projectPath, {
+      project,
+      scenes,
+      variables,
+      scripts,
+    });
+  }, [building, dirty, save, setBuilding]);
 
   const onTabChange = useCallback((newView: string) => {
     setView(newView);

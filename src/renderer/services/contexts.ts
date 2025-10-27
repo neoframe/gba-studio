@@ -18,6 +18,7 @@ export interface AppContextType extends Omit<AppPayload, 'project'> {
   projectBase: string;
   dirty: boolean;
   building: boolean;
+  save(): Promise<void>;
   setBuilding(building: boolean): void;
   onMoveScene?(scene: GameScene, e: Partial<MoveableState>): void;
   onCanvasChange?(payload: Partial<AppPayload>): void;
@@ -35,6 +36,7 @@ export const AppContext = createContext<AppContextType>({
   projectBase: '',
   dirty: false,
   building: false,
+  save: async () => {},
   setBuilding: () => {},
 });
 

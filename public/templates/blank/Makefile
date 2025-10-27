@@ -25,13 +25,12 @@ USERLIBS     :=
 DEFAULTLIBS  :=
 STACKTRACE   :=
 USERBUILD    :=
+EXTTOOL      :=
 
 ifneq (,$(wildcard ./.env))
   include .env
   export
 endif
-
-EXTTOOL      := @$(YARN) build
 
 ifndef LIBBUTANOABS
   export LIBBUTANOABS := $(realpath $(LIBBUTANO))

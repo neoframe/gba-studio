@@ -1,16 +1,14 @@
 import path from 'node:path';
 import url from 'node:url';
 
-import { net, session, BrowserWindow, nativeTheme } from 'electron';
-
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+import { net, session, BrowserWindow, nativeTheme, app } from 'electron';
 
 export const createSelectionWindow = async () => {
-  const {
-    WindowCorner,
-    VibrancyMaterial,
-    EffectState,
-  } = await import('@neoframe/electron-window-corner-addon');
+  // const {
+  //   WindowCorner,
+  //   VibrancyMaterial,
+  //   EffectState,
+  // } = await import('@neoframe/electron-window-corner-addon');
 
   const win = new BrowserWindow({
     width: 720,
@@ -18,24 +16,26 @@ export const createSelectionWindow = async () => {
     frame: false,
     maximizable: false,
     resizable: false,
+    vibrancy: 'under-window',
     minimizable: false,
     transparent: true,
+    // backgroundColor: '#1A1A1A1A',
     titleBarStyle: 'hidden',
     show: false,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(app.getAppPath(), './.vite/build/preload.js'),
       contextIsolation: true,
     },
   });
 
   win.setWindowButtonVisibility(false);
 
-  WindowCorner.setCornerRadius(
-    win,
-    26,
-    VibrancyMaterial.UNDER_WINDOW_BACKGROUND,
-    EffectState.ACTIVE,
-  );
+  // WindowCorner.setCornerRadius(
+  //   win,
+  //   26,
+  //   VibrancyMaterial.UNDER_WINDOW_BACKGROUND,
+  //   EffectState.ACTIVE,
+  // );
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     const url = new URL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
@@ -45,7 +45,8 @@ export const createSelectionWindow = async () => {
     win.loadURL(url.toString());
   } else {
     win.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
+      path.join(app.getAppPath(),
+        `./.vite/renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
       { query: {
         theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
       } },
@@ -58,11 +59,11 @@ export const createSelectionWindow = async () => {
 };
 
 export const createProjectWindow = async (projectPath: string) => {
-  const {
-    WindowCorner,
-    VibrancyMaterial,
-    EffectState,
-  } = await import('@neoframe/electron-window-corner-addon');
+  // const {
+  //   WindowCorner,
+  //   VibrancyMaterial,
+  //   EffectState,
+  // } = await import('@neoframe/electron-window-corner-addon');
 
   const projectName = path.basename(projectPath, '.gbasproj');
   const ses = session.fromPartition(projectName);
@@ -72,6 +73,8 @@ export const createProjectWindow = async (projectPath: string) => {
     height: 600,
     frame: false,
     transparent: true,
+    vibrancy: 'under-window',
+    // backgroundColor: '#1A1A1A1A',
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: {
       x: 24,
@@ -79,7 +82,7 @@ export const createProjectWindow = async (projectPath: string) => {
     },
     show: false,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(app.getAppPath(), './.vite/build/preload.js'),
       contextIsolation: true,
       partition: projectName,
       ...MAIN_WINDOW_VITE_DEV_SERVER_URL && { webSecurity: false },
@@ -128,7 +131,8 @@ export const createProjectWindow = async (projectPath: string) => {
     });
   } else {
     win.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
+      path.join(app.getAppPath(),
+        `./.vite/renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
       { query: {
         projectPath,
         projectBase: path.dirname(projectPath),
@@ -139,12 +143,12 @@ export const createProjectWindow = async (projectPath: string) => {
 
   win.show();
 
-  WindowCorner.setCornerRadius(
-    win,
-    26,
-    VibrancyMaterial.WINDOW_BACKGROUND,
-    EffectState.ACTIVE,
-  );
+  // WindowCorner.setCornerRadius(
+  //   win,
+  //   26,
+  //   VibrancyMaterial.WINDOW_BACKGROUND,
+  //   EffectState.ACTIVE,
+  // );
 
   return win;
 };

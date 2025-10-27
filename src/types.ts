@@ -289,9 +289,11 @@ export interface Build {
   id: string;
   projectPath: string;
   controller: AbortController;
+  data?: Partial<AppPayload>;
 }
 
 export interface BuildMessage {
   id: string;
+  type?: 'log' | 'error' | 'success';
   message: string;
 }

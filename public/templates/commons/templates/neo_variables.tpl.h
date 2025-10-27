@@ -11,7 +11,7 @@ namespace neo::variables
 {
   struct registry
   {
-    bn::unordered_map<bn::string_view, bn::string_view, {{variables.length}}> all;
+    bn::unordered_map<bn::string_view, bn::string_view, {{or variables.length 1}}> all;
 
     inline void init ()
     {

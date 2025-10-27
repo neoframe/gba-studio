@@ -11,4 +11,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@thenick775/mgba-wasm'],
   },
+  build: {
+    outDir: '../../.vite/renderer/main_window',
+  },
 });

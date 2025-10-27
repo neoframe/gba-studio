@@ -50,6 +50,10 @@ const App = () => {
     dispatch({ building: false });
   }, []);
 
+  useBridgeListener('build-aborted', () => {
+    dispatch({ building: false });
+  }, []);
+
   useLayoutEffect(() => {
     const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches
       ? 'dark'
@@ -88,6 +92,7 @@ const App = () => {
         variables: state.variables,
         scripts: state.scripts,
       });
+      dispatch({ dirty: false });
     }
   }, [
     projectPath,
@@ -99,7 +104,6 @@ const App = () => {
 
     if (state.dirty) {
       save();
-      dispatch({ dirty: false });
     }
   }, [state.dirty, save]);
 
@@ -218,6 +222,7 @@ const App = () => {
     scripts: state.scripts,
     projectPath: projectPath || '',
     projectBase: state.projectBase,
+    save,
     setBuilding,
     onMoveScene,
     onCanvasChange,
@@ -226,7 +231,7 @@ const App = () => {
     state.scenes, state.projectBase, state.variables, state.project,
     state.dirty, state.sprites, state.backgrounds, state.sounds,
     state.scripts, state.music, state.building,
-    setBuilding, onCanvasChange, onMoveScene,
+    save, setBuilding, onCanvasChange, onMoveScene,
   ]);
 
   return (

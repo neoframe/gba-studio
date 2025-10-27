@@ -42,14 +42,14 @@ namespace neo::scenes
   //////////////////////////
 
   // Scene Events
-  {{#if this.events}}
+  {{#if (hasItems this.events)}}
   {{>eventsPartial prefix=(concat (slug this.name) "_event") events=this.events}}
-  {{/if}}
   neo::types::event* {{slug this.name}}_events[] = {
     {{#each this.events}}
     &{{slug ../this.name}}_event_{{@index}},
     {{/each}}
   };
+  {{/if}}
 
   // Map collisions
   {{#if this.map}}
@@ -60,11 +60,10 @@ namespace neo::scenes
   };
 
   // Map sensors
-  {{#if this.map.sensors}}
+  {{#if (hasItems this.map.sensors)}}
   {{#each this.map.sensors}}
-
   // -- Sensor events
-  {{#if this.events}}
+  {{#if (hasItems this.events)}}
   {{>eventsPartial prefix=(concat (slug ../this.name) "_sensor_" @index "_event") events=this.events}}
   {{/if}}
   neo::types::event* {{slug ../this.name}}_sensor_{{@index}}_events[] = {
@@ -80,8 +79,12 @@ namespace neo::scenes
     {{this.y}},
     {{valuedef this.width 1}},
     {{valuedef this.height 1}},
-    {{this.events.length}},
+    {{valuedef this.events.length 0}},
+    {{#if (hasItems this.events)}}
     {{slug ../this.name}}_sensor_{{@index}}_events
+    {{else}}
+    nullptr
+    {{/if}}
   };
   {{/each}}
 
@@ -115,11 +118,11 @@ namespace neo::scenes
   };
   {{/if}}
 
-  {{#if this.actors.length}}
+  {{#if (hasItems this.actors)}}
   // Actors
   {{#each this.actors}}
   // -- Actor events
-  {{#if this.events.init.length}}
+  {{#if (hasItems this.events.init)}}
   {{>eventsPartial prefix=(concat (slug ../this.name) "_actor_" @index "_init_event") events=this.events.init}}
   neo::types::event* {{slug ../this.name}}_actor_{{@index}}_init_events[] = {
     {{#each this.events.init}}
@@ -127,7 +130,7 @@ namespace neo::scenes
     {{/each}}
   };
   {{/if}}
-  {{#if this.events.interact.length}}
+  {{#if (hasItems this.events.interact)}}
   {{>eventsPartial prefix=(concat (slug ../this.name) "_actor_" @index "_interact_event") events=this.events.interact}}
   neo::types::event* {{slug ../this.name}}_actor_{{@index}}_interact_events[] = {
     {{#each this.events.interact}}
@@ -135,7 +138,7 @@ namespace neo::scenes
     {{/each}}
   };
   {{/if}}
-  {{#if this.events.update.length}}
+  {{#if (hasItems this.events.update)}}
   {{>eventsPartial prefix=(concat (slug ../this.name) "_actor_" @index "_update_event") events=this.events.update}}
   neo::types::event* {{slug ../this.name}}_actor_{{@index}}_update_events[] = {
     {{#each this.events.update}}
@@ -150,21 +153,21 @@ namespace neo::scenes
     {{valuedef this.y 0}},
     neo::types::direction::{{uppercase (valuedef this.direction "down")}},
     bn::sprite_items::{{valuedef this.sprite "sprite_default"}},
-    {{#if this.events.init.length}}
+    {{#if (hasItems this.events.init)}}
     {{this.events.init.length}},
     {{slug ../this.name}}_actor_{{@index}}_init_events,
     {{else}}
     0,
     nullptr,
     {{/if}}
-    {{#if this.events.interact.length}}
+    {{#if (hasItems this.events.interact)}}
     {{this.events.interact.length}},
     {{slug ../this.name}}_actor_{{@index}}_interact_events,
     {{else}}
     0,
     nullptr,
     {{/if}}
-    {{#if this.events.update.length}}
+    {{#if (hasItems this.events.update)}}
     {{this.events.update.length}},
     {{slug ../this.name}}_actor_{{@index}}_update_events
     {{else}}
@@ -189,8 +192,13 @@ namespace neo::scenes
     {{else}}
     bn::regular_bg_items::bg_default,
     {{/if}}
+    {{#if (hasItems this.events) }}
     {{this.events.length}},
     {{slug this.name}}_events,
+    {{else}}
+    0,
+    nullptr,
+    {{/if}}
     {{#if this.player}}
     true,
     { {{this.player.x}}, {{this.player.y}} },
@@ -205,7 +213,7 @@ namespace neo::scenes
     {{else}}
     nullptr,
     {{/if}}
-    {{#if this.actors}}
+    {{#if (hasItems this.actors)}}
     {{this.actors.length}},
     {{slug this.name}}_actors
     {{else}}
@@ -242,7 +250,7 @@ namespace neo::scenes
 
   // Scripts
   {{#each scripts}}
-  {{#if this.events}}
+  {{#if (hasItems this.events)}}
   {{>eventsPartial prefix=(concat (slug this.name) "_script_event") events=this.events}}
   neo::types::event* {{slug this.name}}_script_events[] = {
     {{#each this.events}}
@@ -253,10 +261,11 @@ namespace neo::scenes
   neo::types::script script_{{slug this.name}} = {
     "{{this.id}}",
     "{{this.name}}",
+    {{#if (hasItems this.events)}}
     {{this.events.length}},
-    {{#if this.events}}
     {{slug this.name}}_script_events
     {{else}}
+    0,
     nullptr
     {{/if}}
   };

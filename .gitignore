@@ -140,3 +140,7 @@ vite.config.ts.timestamp-*
 
 # Electron forge
 .vite
+
+# MacOS
+.DS_Store
+**/.DS_Store
