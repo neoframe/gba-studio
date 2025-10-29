@@ -21,6 +21,7 @@ export interface RecentProject {
 
 export interface AppStorage {
   recentProjects?: RecentProject[];
+  buildConfiguration?: string;
 }
 
 export type VariableValue = string | number | boolean;
@@ -143,6 +144,8 @@ export interface ProjectConfiguration {
 
 export interface GameProject {
   name: string;
+  romName: string;
+  romCode: string;
   scenes: ProjectSceneData[];
   settings?: ProjectSettings;
   configurations?: ProjectConfiguration[];

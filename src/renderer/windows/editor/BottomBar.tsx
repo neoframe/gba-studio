@@ -3,9 +3,12 @@ import { classNames, mockState } from '@junipero/react';
 import { type ResizableProps, Resizable } from 're-resizable';
 import { Card, Tabs, ScrollArea } from '@radix-ui/themes';
 
+import {
+  type BottomBarContextType,
+  BottomBarContext,
+} from '../../services/contexts';
 import { useEditor } from '../../services/hooks';
 import BuildLogsTab from './BuildLogsTab';
-import { BottomBarContext, BottomBarContextType } from '../../services/contexts';
 
 export interface BottomBarProps extends ResizableProps {}
 

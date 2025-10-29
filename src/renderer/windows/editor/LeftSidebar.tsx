@@ -14,6 +14,7 @@ import {
   IconButton,
   Inset,
   ScrollArea,
+  Select,
   Tabs,
   Text,
   Tooltip,
@@ -39,8 +40,10 @@ const LeftSidebar = ({
     scenes,
     variables,
     scripts,
+    editorConfig,
     save,
     setBuilding,
+    setEditorConfig,
   } = useApp();
   const {
     view,
@@ -95,6 +98,13 @@ const LeftSidebar = ({
     setLeftSidebarWidth(ref.offsetWidth);
   }, [setLeftSidebarWidth]);
 
+  const onBuildConfigChange = useCallback((value: string) => {
+    setEditorConfig({
+      ...editorConfig,
+      buildConfiguration: value || undefined,
+    });
+  }, [editorConfig, setEditorConfig]);
+
   return (
     <>
       <div
@@ -117,6 +127,30 @@ const LeftSidebar = ({
           />
         </IconButton>
         <div className="flex items-center gap-2">
+          { (project?.configurations?.length || 0) > 0 && (
+            <Select.Root
+              size="1"
+              value={editorConfig?.buildConfiguration || ''}
+              onValueChange={onBuildConfigChange}
+            >
+              <Select.Trigger placeholder="Default" />
+              <Select.Content>
+                <Select.Group>
+                  <Select.Label>
+                    <Text size="1">Build Configuration</Text>
+                  </Select.Label>
+                  <Select.Item value="default">
+                    Default
+                  </Select.Item>
+                  { project?.configurations?.map(config => (
+                    <Select.Item key={config.id} value={config.id}>
+                      { config.name || 'Unnamed' }
+                    </Select.Item>
+                  )) }
+                </Select.Group>
+              </Select.Content>
+            </Select.Root>
+          ) }
           <IconButton variant="ghost" radius="full" onClick={onToggleBuild}>
             { building ? (
               <StopIcon

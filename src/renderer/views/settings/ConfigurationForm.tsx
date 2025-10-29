@@ -57,17 +57,6 @@ const ConfigurationForm = ({
               onBlur={onFieldBlur}
             />
           </div>
-          <div className="flex flex-col items-start gap-2">
-            <Text>g++ executable path</Text>
-            <TextField.Root
-              size="3"
-              value={settings?.gppPath || ''}
-              onChange={onTextChange.bind(null, 'settings.gppPath')}
-              placeholder="/usr/bin/g++"
-              className="w-96"
-              onBlur={onFieldBlur}
-            />
-          </div>
         </Card>
       </div>
       <div className="flex flex-col gap-3">

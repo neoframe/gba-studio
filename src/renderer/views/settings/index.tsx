@@ -22,6 +22,8 @@ const Settings = () => {
     selectedConfiguration: 'default',
     project: cloneDeep(project || {
       name: '',
+      romName: '',
+      romCode: '',
       scenes: [],
       settings: {},
       configurations: [],
@@ -100,6 +102,28 @@ const Settings = () => {
                 value={state.project?.name}
                 onChange={onTextChange.bind(null, 'name')}
                 placeholder="My GBA Project"
+                className="w-96"
+                onBlur={onProjectChange?.bind(null, state.project)}
+              />
+            </div>
+            <div className="flex flex-col items-start gap-2">
+              <Text>ROM Name</Text>
+              <TextField.Root
+                size="3"
+                value={state.project?.romName || state.project?.name}
+                onChange={onTextChange.bind(null, 'romName')}
+                placeholder="My GBA Project"
+                className="w-96"
+                onBlur={onProjectChange?.bind(null, state.project)}
+              />
+            </div>
+            <div className="flex flex-col items-start gap-2">
+              <Text>ROM Code</Text>
+              <TextField.Root
+                size="3"
+                value={state.project?.romCode}
+                onChange={onTextChange.bind(null, 'romCode')}
+                placeholder="MYGBAGAME"
                 className="w-96"
                 onBlur={onProjectChange?.bind(null, state.project)}
               />

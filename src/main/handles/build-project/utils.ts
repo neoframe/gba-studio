@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { type SpawnOptions, spawn } from 'node:child_process';
 
 import type { IpcMainInvokeEvent } from 'electron';
 import slugify from 'slugify';
@@ -74,12 +74,14 @@ export function runCommand (
     build?: Build;
     log?: boolean;
     logErrors?: boolean;
-  }
+  },
+  spawnOpts?: SpawnOptions,
 ) {
   return new Promise<string>((resolve, reject) => {
     const process = spawn(command, args, {
       cwd: opts?.cwd,
       stdio: 'pipe',
+      ...spawnOpts,
     });
 
     process.on('error', err => {

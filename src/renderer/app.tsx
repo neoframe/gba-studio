@@ -5,6 +5,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 
 import type {
   AppPayload,
+  AppStorage,
   GameProject,
   GameScene,
 } from '../types';
@@ -23,6 +24,7 @@ export interface AppState extends Omit<AppPayload, 'project'> {
   dirty: boolean;
   building: boolean;
   project?: GameProject;
+  editorConfig?: AppStorage;
 }
 
 const App = () => {
@@ -66,11 +68,14 @@ const App = () => {
   const init = useCallback(async () => {
     if (projectPath) {
       const data = await window.electron.loadProject(projectPath);
+      const editorConfig = await window.electron.getEditorConfig();
+
       dispatch({
         ...data,
         history: [cloneDeep(data)],
         historyIndex: 0,
         loading: false,
+        editorConfig,
         ready: true,
       });
     }
@@ -219,6 +224,11 @@ const App = () => {
     dispatch({ building });
   }, []);
 
+  const setEditorConfig = useCallback((config: AppStorage) => {
+    dispatch({ editorConfig: config });
+    window.electron.setEditorConfig(config);
+  }, []);
+
   const getContext = useCallback((): AppContextType => ({
     project: state.project,
     scenes: state.scenes,
@@ -232,8 +242,10 @@ const App = () => {
     scripts: state.scripts,
     projectPath: projectPath || '',
     projectBase: state.projectBase,
+    editorConfig: state.editorConfig,
     save,
     setBuilding,
+    setEditorConfig,
     onMoveScene,
     onCanvasChange,
     onProjectChange,
@@ -241,8 +253,9 @@ const App = () => {
     projectPath,
     state.scenes, state.projectBase, state.variables, state.project,
     state.dirty, state.sprites, state.backgrounds, state.sounds,
-    state.scripts, state.music, state.building,
+    state.scripts, state.music, state.building, state.editorConfig,
     save, setBuilding, onCanvasChange, onMoveScene, onProjectChange,
+    setEditorConfig,
   ]);
 
   return (

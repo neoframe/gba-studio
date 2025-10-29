@@ -1,6 +1,11 @@
 import { contextBridge, ipcRenderer } from 'electron/renderer';
 
-import type { AppPayload, ProjectTemplate, RecentProject } from '../types';
+import type {
+  AppPayload,
+  AppStorage,
+  ProjectTemplate,
+  RecentProject,
+} from '../types';
 
 contextBridge.exposeInMainWorld('electron', {
   // EventTarget
@@ -50,6 +55,10 @@ contextBridge.exposeInMainWorld('electron', {
     ipcRenderer.invoke('abort-build-project', buildId),
   getRomPath: (projectPath: string): Promise<string> =>
     ipcRenderer.invoke('get-rom-path', projectPath),
+  getEditorConfig: (): Promise<AppStorage> =>
+    ipcRenderer.invoke('get-editor-config'),
+  setEditorConfig: (config: AppStorage): Promise<void> =>
+    ipcRenderer.invoke('set-editor-config', config),
 
   // Info
   platform: process.platform,

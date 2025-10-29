@@ -7,7 +7,13 @@ export const isDev = () =>
 
 export const getResourcesDir = () => {
   if (isDev()) {
-    return path.join(__dirname, '../../');
+    const url = path.join(__dirname, '../../');
+
+    if (process.platform === 'win32') {
+      return url.slice(1);
+    } else {
+      return url;
+    }
   } else {
     return process.resourcesPath;
   }

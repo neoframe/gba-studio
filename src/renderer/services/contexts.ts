@@ -3,6 +3,7 @@ import { createContext } from 'react';
 
 import type {
   AppPayload,
+  AppStorage,
   GameActor,
   GameProject,
   GameScene,
@@ -18,8 +19,10 @@ export interface AppContextType extends Omit<AppPayload, 'project'> {
   projectBase: string;
   dirty: boolean;
   building: boolean;
+  editorConfig?: AppStorage;
   save(): Promise<void>;
   setBuilding(building: boolean): void;
+  setEditorConfig(config: AppStorage): void;
   onMoveScene?(scene: GameScene, e: Partial<MoveableState>): void;
   onCanvasChange?(payload: Partial<AppPayload>): void;
   onProjectChange?(project: GameProject): void;
@@ -39,6 +42,7 @@ export const AppContext = createContext<AppContextType>({
   building: false,
   save: async () => {},
   setBuilding: () => {},
+  setEditorConfig: () => {},
 });
 
 export interface EditorContextType {

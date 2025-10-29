@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from 'react';
+import { ScrollArea, ScrollAreaProps } from '@radix-ui/themes';
 import { classNames } from '@junipero/react';
 
 import { useEditor } from '../../services/hooks';
@@ -7,24 +7,25 @@ const ConstrainedView = ({
   className,
   children,
   ...rest
-}: ComponentPropsWithoutRef<'div'>) => {
-  const { leftSidebarOpened, leftSidebarWidth } = useEditor();
+}: ScrollAreaProps) => {
+  const { leftSidebarOpened, leftSidebarWidth, bottomBarHeight } = useEditor();
 
   return (
-    <div
+    <ScrollArea
       { ...rest }
       className={classNames(
-        'w-screen h-screen relative pt-14',
+        'w-screen relative pt-14',
         className,
       )}
       style={{
         ...(leftSidebarOpened ? { paddingLeft: leftSidebarWidth } : {}),
+        height: `calc(100vh - ${bottomBarHeight}px)`,
       }}
     >
       <div className="px-2">
         { children }
       </div>
-    </div>
+    </ScrollArea>
   );
 };
 

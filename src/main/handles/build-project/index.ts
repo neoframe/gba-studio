@@ -17,16 +17,46 @@ import {
   sendSuccessLog,
 } from './utils';
 import { buildTemplates } from './templates';
+import Storage from '../../storage';
 
 const builds = new Map<string, Build>();
 let latestBuildId: string | null = null;
 
-async function checkGit (event: IpcMainInvokeEvent, build: Build) {
+const getBuildConfiguration = (
+  storage: Storage,
+  build: Build,
+) => {
+  const confName = storage.config?.buildConfiguration || 'default';
+
+  if (confName === 'default') {
+    return build?.data?.project?.settings;
+  }
+
+  return build?.data?.project?.configurations?.find(conf =>
+    conf.id === confName
+  )?.settings;
+};
+
+const getPythonPath = (
+  storage: Storage,
+  build: Build,
+) => {
+  const projectSettings = getBuildConfiguration(storage, build);
+
+  return projectSettings?.pythonPath ||
+    (process.platform === 'darwin' ? 'python3' : 'python');
+};
+
+async function checkGit (
+  storage: Storage,
+  event: IpcMainInvokeEvent,
+  build: Build,
+) {
   if (build.controller.signal.aborted) {
     return;
   }
 
-  const projectSettings = build.data?.project?.settings;
+  const projectSettings = getBuildConfiguration(storage, build);
 
   sendStep(event, build.id, 'Checking project configuration...');
   sendLog(event, build.id, 'Verifying Git repository...');
@@ -58,12 +88,16 @@ async function checkGit (event: IpcMainInvokeEvent, build: Build) {
   }
 }
 
-async function checkButano (event: IpcMainInvokeEvent, build: Build) {
+async function checkButano (
+  storage: Storage,
+  event: IpcMainInvokeEvent,
+  build: Build,
+) {
   if (build.controller.signal.aborted) {
     return;
   }
 
-  const projectSettings = build.data?.project?.settings;
+  const projectSettings = getBuildConfiguration(storage, build);
 
   sendLog(event, build.id, 'Verifying Butano submodule status...');
 
@@ -96,85 +130,41 @@ async function checkButano (event: IpcMainInvokeEvent, build: Build) {
   sendSuccessLog(event, build.id, 'Butano submodule initialized');
 }
 
-async function checkPython (event: IpcMainInvokeEvent, build: Build) {
+async function checkPython (
+  storage: Storage,
+  event: IpcMainInvokeEvent,
+  build: Build,
+) {
   if (build.controller.signal.aborted) {
     return;
   }
 
-  const projectSettings = build.data?.project?.settings;
+  const command = getPythonPath(storage, build);
 
-  sendLog(event, build.id, 'Checking Python path...');
+  sendLog(event, build.id, 'Checking Python...');
 
-  try {
-    const pythonVersion = await runCommand(
-      projectSettings?.pythonPath || 'python',
-      ['--version'],
-      {
-        cwd: path.dirname(build.projectPath),
-        event,
-        build,
-        logErrors: false,
-      },
-    );
+  const version = await runCommand(command, ['--version'], {
+    cwd: path.dirname(build.projectPath),
+    event,
+    build,
+  });
 
-    sendSuccessLog(event, build.id, 'Python found: ' + pythonVersion.trim());
-  } catch {
-    try {
-      const python3Version = await runCommand(
-        projectSettings?.pythonPath || 'python3',
-        ['--version'],
-        {
-          cwd: path.dirname(build.projectPath),
-          event,
-          build,
-          logErrors: false,
-        },
-      );
-
-      if (!python3Version.startsWith('Python')) {
-        throw new Error('Invalid python3 version output');
-      }
-
-      sendSuccessLog(event, build.id, 'Python found: ' + python3Version.trim());
-
-      const envPath = path.join(
-        path.dirname(build.projectPath),
-        '.env'
-      );
-
-      let envContent = '';
-
-      try {
-        envContent = await fs.readFile(envPath, 'utf-8');
-        sendLog(event, build.id, 'Existing .env file found, updating...');
-      } catch {}
-
-      if (!envContent.includes('PYTHON=')) {
-        envContent += (envContent.length > 0 ? '\n' : '') + 'PYTHON=python3\n';
-        await fs.writeFile(envPath, envContent, 'utf-8');
-        sendSuccessLog(event, build.id, 'Updated .env file with python3 path');
-      }
-    } catch (e) {
-      sendError(event, build.id, (e as Error).message);
-      sendError(event, build.id,
-        'Automatic python executable detection failed. Python is not ' +
-        'installed or not found in PATH, please set the ' +
-        'right command in your project\'s settings.');
-      build.controller.abort();
-      sendAbort(event, build.id);
-    }
-  }
+  sendSuccessLog(event, build.id, 'Python found: ' + version.trim());
 }
 
-async function checkDependencies (event: IpcMainInvokeEvent, build: Build) {
+async function checkDependencies (
+  storage: Storage,
+  event: IpcMainInvokeEvent,
+  build: Build,
+) {
   if (build.controller.signal.aborted) {
     return;
   }
 
   sendStep(event, build.id, 'Checking project dependencies...');
 
-  await checkButano(event, build);
-  await checkPython(event, build);
+  await checkButano(storage, event, build);
+  await checkPython(storage, event, build);
 }
 
 async function checkTemplates (event: IpcMainInvokeEvent, build: Build) {
@@ -218,7 +208,11 @@ async function checkTemplates (event: IpcMainInvokeEvent, build: Build) {
   sendSuccessLog(event, build.id, 'graphics/ folder updated');
 }
 
-async function buildProject (event: IpcMainInvokeEvent, build: Build) {
+async function buildProject (
+  storage: Storage,
+  event: IpcMainInvokeEvent,
+  build: Build,
+) {
   if (build.controller.signal.aborted) {
     return;
   }
@@ -227,11 +221,21 @@ async function buildProject (event: IpcMainInvokeEvent, build: Build) {
   await buildTemplates(event, build);
 
   sendStep(event, build.id, 'Building project...');
-  sendLog(event, build.id, 'Building using project\'s Makefile...');
+  sendLog(event, build.id, 'Building project...');
+
+  const pythonPath = getPythonPath(storage, build);
+
   await runCommand('make', [], {
     cwd: path.dirname(build.projectPath),
     event,
     build,
+  }, {
+    env: {
+      ...process.env,
+      PYTHON: pythonPath,
+      ROMTITLE: build.data?.project?.romName || 'My Game',
+      ROMCODE: build.data?.project?.romCode || 'ABCD',
+    },
   });
 
   sendSuccessLog(event, build.id, 'Project built successfully 🎉');
@@ -251,26 +255,38 @@ async function buildProject (event: IpcMainInvokeEvent, build: Build) {
     sendAbort(event, build.id);
   }
 
-  const runner = spawn('open', [
-    '-a', 'mGBA',
+  const projectSettings = getBuildConfiguration(storage, build);
+
+  const [command, ...args] = (
+    projectSettings?.emulatorCommand || 'open -a mGBA'
+  ).split(
+    // Take spaces in folders into account
+    /\s+(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/gm
+  );
+
+  const runner = spawn(command, [
+    ...args,
     builtGbaPath,
-  ], {
-    stdio: 'inherit',
-  });
+  ], { stdio: 'inherit', shell: true });
+
   runner.unref();
 }
 
-async function startBuild (event: IpcMainInvokeEvent, build: Build) {
+async function startBuild (
+  storage: Storage,
+  event: IpcMainInvokeEvent,
+  build: Build,
+) {
   try {
-    await checkGit(event, build);
-    await checkDependencies(event, build);
+    await checkGit(storage, event, build);
+    await checkDependencies(storage, event, build);
     await checkTemplates(event, build);
 
     if (build.controller.signal.aborted) {
       return;
     }
 
-    await buildProject(event, build);
+    await buildProject(storage, event, build);
 
     event.sender.send('build-completed', build.id);
   } catch (e) {
@@ -283,6 +299,7 @@ async function startBuild (event: IpcMainInvokeEvent, build: Build) {
 }
 
 export function startBuildProject (
+  storage: Storage,
   event: IpcMainInvokeEvent,
   projectPath: string,
   data?: Partial<AppPayload>,
@@ -294,7 +311,7 @@ export function startBuildProject (
 
   builds.set(buildId, build);
   event.sender.send('build-started', { id: buildId });
-  startBuild(event, build);
+  startBuild(storage, event, build);
 
   return buildId;
 }

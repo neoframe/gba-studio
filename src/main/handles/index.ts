@@ -8,5 +8,7 @@ export { default as createProject } from './create-project';
 export { default as isFullscreen } from './is-fullscreen';
 export { default as getRomPath } from './get-rom-path';
 export { default as clearRecentProjects } from './clear-recent-projects';
+export { default as getEditorConfig } from './get-editor-config';
+export { default as setEditorConfig } from './set-editor-config';
 
 export * from './build-project';

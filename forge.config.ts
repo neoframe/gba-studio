@@ -15,6 +15,8 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     icon: './images/AppIcon',
+    appBundleId: 'dev.gbastudio.app',
+    executableName: process.platform === 'linux' ? 'gba-studio' : 'GBA Studio',
     extraResource: [
       './public',
     ],
@@ -32,6 +34,13 @@ const config: ForgeConfig = {
 
           return { 'hardened-runtime': true };
         },
+      },
+    },
+    ...process.env.NOTARIZE_ENABLED === 'true' && {
+      osxNotarize: {
+        appleId: process.env.APPLE_ID!,
+        appleIdPassword: process.env.APPLE_ID_PASSWORD!,
+        teamId: process.env.APPLE_TEAM_ID!,
       },
     },
     afterCopy: [removeLocalesPlugin],

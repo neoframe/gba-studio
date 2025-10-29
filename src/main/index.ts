@@ -24,6 +24,8 @@ import {
   abortBuildProject,
   getRomPath,
   clearRecentProjects,
+  getEditorConfig,
+  setEditorConfig,
 } from './handles';
 import Storage from './storage';
 
@@ -66,8 +68,10 @@ ipcMain.handle('save-project', saveProject);
 ipcMain.handle('get-directory-path', getDirectoryPath);
 ipcMain.handle('create-project', createProject.bind(null, storage));
 ipcMain.handle('is-fullscreen', isFullscreen);
-ipcMain.handle('start-build-project', startBuildProject);
+ipcMain.handle('start-build-project', startBuildProject.bind(null, storage));
 ipcMain.handle('abort-build-project', abortBuildProject);
 ipcMain.handle('get-rom-path', getRomPath);
 ipcMain.handle('clear-recent-projects',
   clearRecentProjects.bind(null, storage));
+ipcMain.handle('get-editor-config', getEditorConfig.bind(null, storage));
+ipcMain.handle('set-editor-config', setEditorConfig.bind(null, storage));
