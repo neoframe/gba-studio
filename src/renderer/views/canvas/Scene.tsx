@@ -1,5 +1,4 @@
 import {
-  type ComponentPropsWithoutRef,
   type MouseEvent,
   useCallback,
   useEffect,
@@ -8,6 +7,7 @@ import {
 } from 'react';
 import {
   type MoveableState,
+  type MoveableProps,
   Moveable,
   classNames,
   useInfiniteCanvas,
@@ -20,7 +20,7 @@ import { getImageSize, pixelToTile, tileToPixel } from '../../../helpers';
 import Sprite from '../../components/Sprite';
 
 export interface SceneProps
-  extends Omit<ComponentPropsWithoutRef<'div'>, 'onSelect' | 'onChange'> {
+  extends Omit<MoveableProps, 'onSelect' | 'onChange'> {
   scene: GameScene;
   preview?: boolean;
   onChange?: (scene: GameScene) => void;
@@ -40,15 +40,21 @@ const Scene = ({
   onSelect,
   onSelectItem,
   onMove,
+  ...rest
 }: SceneProps) => {
-  const { zoom, mouseX, mouseY } = useInfiniteCanvas();
+  const { zoom, mouseX, offsetX, mouseY, offsetY } = useInfiniteCanvas();
   const { projectBase, project, sprites } = useApp();
   const { selectedScene, selectedItem, tool } = useCanvas();
   const [size, setSize] = useState([240, 160]);
 
   const sceneConfig = useMemo(() => (
-    project?.scenes?.find(s => s._file === scene._file)
-  ), [project, scene]);
+    preview
+      ? {
+        x: Math.round((mouseX - offsetX) / zoom),
+        y: Math.round((mouseY - offsetY) / zoom),
+      }
+      : project?.scenes?.find(s => s._file === scene._file)
+  ), [project, scene, preview, mouseX, mouseY]);
 
   const backgroundPath = useMemo(() => scene.background ? (
     `project://graphics/${scene.background}.bmp`
@@ -148,23 +154,17 @@ const Scene = ({
 
   return (
     <Moveable
+      { ...rest }
+      strategy="position"
       onMouseDown={onSelect_}
       onMove={onMove?.bind(null, scene)}
-      transformScale={preview ? 1 : zoom}
-      strategy="position"
+      transformScale={zoom}
       x={sceneConfig?.x || 0}
       y={sceneConfig?.y || 0}
       disabled={
-        tool !== 'default' || selectedScene !== scene ||
-        !!selectedItem
+        (tool === 'add' && preview) || tool !== 'default' ||
+        selectedScene !== scene || !!selectedItem
       }
-      style={preview ? {
-        position: 'fixed',
-        left: mouseX,
-        top: mouseY,
-        transform: `scale(${zoom})`,
-        transformOrigin: '0 0',
-      } : undefined}
     >
       <div
         className={classNames(
@@ -173,7 +173,7 @@ const Scene = ({
         )}
       >
         <span className="absolute block w-full left-0 bottom-full text-center">
-          { scene.name } { tool }
+          { scene.name }
         </span>
         <Card
           className={classNames(

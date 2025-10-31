@@ -12,6 +12,7 @@ import { v4 as uuid } from 'uuid';
 
 import type { GameScene } from '../../../types';
 import { useApp, useCanvas, useEditor } from '../../services/hooks';
+import { DEFAULT_SCENE } from '../../services/defaults';
 import FullscreenView from '../../windows/editor/FullscreenView';
 import Scene from './Scene';
 import Toolbar from './Toolbar';
@@ -70,6 +71,15 @@ const Canvas = () => {
       resetTool?.();
     }
   }, [resetTool, tool]);
+
+  useHotkeys('escape', e => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (tool === 'add') {
+      resetTool?.();
+    }
+  }, [tool, resetTool]);
 
   useHotkeys('delete, backspace', e => {
     e.preventDefault();
@@ -136,12 +146,10 @@ const Canvas = () => {
   const onCanvasClick = useCallback(() => {
     if (tool === 'add') {
       const scene: GameScene = {
+        ...DEFAULT_SCENE,
         id: uuid(),
         _file: `scene_${appPayload.scenes.length + 1}.json`,
         name: `Scene ${appPayload.scenes.length + 1}`,
-        background: 'bg_default',
-        type: 'scene',
-        sceneType: 'logos',
       };
 
       onCanvasChange?.({
@@ -194,14 +202,8 @@ const Canvas = () => {
 
           { tool === 'add' && subTool === 'scene' && (
             <Scene
-              scene={{
-                id: 'preview',
-                name: 'New Scene',
-                background: 'bg_default',
-                type: 'scene',
-                sceneType: 'logos',
-              }}
-              className="fixed pointer-events-none opacity-50"
+              scene={DEFAULT_SCENE}
+              className="!fixed pointer-events-none opacity-50"
               preview={true}
             />
           )}
