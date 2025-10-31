@@ -1,11 +1,10 @@
 import { type SpawnOptions, spawn } from 'node:child_process';
 import path from 'node:path';
 
-import { app, type IpcMainInvokeEvent } from 'electron';
+import type{ IpcMainInvokeEvent } from 'electron';
 import slugify from 'slugify';
 
 import type { Build } from '../../../types';
-import { isDev } from '../../utils';
 
 export function sendStep (
   event: IpcMainInvokeEvent,
@@ -151,9 +150,9 @@ export const getBuildDir = (build: Build) => {
   const outputDirName = toSlug(path.basename(build.projectPath,
     path.extname(build.projectPath)));
 
-  if (isDev()) {
-    return path.join(path.dirname(build.projectPath), 'tmp', outputDirName);
-  } else {
-    return path.join(app.getPath('temp'), 'gba-studio', outputDirName);
-  }
+  return path.join(path.dirname(build.projectPath), 'tmp', outputDirName);
+
+  // TODO: Try to understand why temp dir does not work with
+  // make/butano/devkitpro
+  // return path.join(app.getPath('temp'), 'gba-studio', outputDirName);
 };
