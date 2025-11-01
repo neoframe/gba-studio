@@ -1,10 +1,11 @@
 import { defineConfig } from 'eslint/config';
-import pooolint from '@poool/eslint-config';
+import pooolint from '@poool/eslint-config-react';
 
 export default defineConfig(
   {
     ignores: [
-      'node_modules', 'dist', '.yarn', '.dev', 'build', '.vite',
+      'node_modules', 'dist', '.yarn', '.dev', 'build', '.vite', 'out',
+      'public',
     ],
   },
   {
@@ -12,6 +13,11 @@ export default defineConfig(
       parserOptions: {
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    settings: {
+      react: {
+        version: 'detect',
       },
     },
   },

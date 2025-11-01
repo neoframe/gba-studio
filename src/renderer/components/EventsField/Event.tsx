@@ -66,7 +66,7 @@ const Event = ({
     setOpened(o => !o);
     event._collapsed = !opened;
     onValueChange?.(event);
-  }, [renaming, opened, event]);
+  }, [renaming, opened, event, onValueChange]);
 
   // TODO: allow to rename events
   // const onRenameClick = () => {

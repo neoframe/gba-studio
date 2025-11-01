@@ -149,7 +149,7 @@ const Canvas = () => {
         s.id === scene?.id || s._file === scene?._file ? scene! : s
       )),
     });
-  }, [onCanvasChange, appPayload.scenes]);
+  }, [onCanvasChange, appPayload]);
 
   const onCanvasClick = useCallback(() => {
     if (tool === 'add' && subTool === 'scene') {

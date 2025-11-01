@@ -48,15 +48,15 @@ const Editor = () => {
 
   const toggleLeftSidebar = useCallback(() => {
     dispatch(s => ({ ...s, leftSidebarOpened: !s.leftSidebarOpened }));
-  }, [state.leftSidebarOpened]);
+  }, []);
 
   const toggleRightSidebar = useCallback(() => {
     dispatch(s => ({ ...s, rightSidebarOpened: !s.rightSidebarOpened }));
-  }, [state.rightSidebarOpened]);
+  }, []);
 
   const toggleBottomBar = useCallback(() => {
     dispatch(s => ({ ...s, bottomBarOpened: !s.bottomBarOpened }));
-  }, [state.bottomBarOpened]);
+  }, []);
 
   const setView = useCallback((view: string) => {
     dispatch({ view });
@@ -104,7 +104,7 @@ const Editor = () => {
   }), [
     state.view, state.leftSidebarOpened, state.leftSidebarWidth,
     state.rightSidebarWidth, state.bottomBarOpened, state.bottomBarHeight,
-    state.bottomBarOpened, state.bottomBarHeight,
+    state.rightSidebarOpened,
     setView, toggleLeftSidebar, setLeftSidebarWidth, setRightSidebarWidth,
     toggleRightSidebar, setBottomBarHeight, toggleBottomBar,
   ]);

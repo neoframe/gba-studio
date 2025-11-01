@@ -35,7 +35,6 @@ const LeftSidebar = ({
   const {
     projectPath,
     building,
-    dirty,
     project,
     scenes,
     variables,
@@ -86,8 +85,7 @@ const LeftSidebar = ({
       scripts,
     });
   }, [
-    building, dirty, selectedScene,
-    projectPath, project, scenes, variables, scripts,
+    building, selectedScene, projectPath, project, scenes, variables, scripts,
     setBuilding,
   ]);
 

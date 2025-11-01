@@ -2,7 +2,13 @@ import type { IpcRendererEvent } from 'electron';
 import { useContext, useDeferredValue, useEffect, useState } from 'react';
 import { useTimeout } from '@junipero/react';
 
-import { AppContext, BottomBarContext, CanvasContext, EditorContext, SceneFormContext } from './contexts';
+import {
+  AppContext,
+  BottomBarContext,
+  CanvasContext,
+  EditorContext,
+  SceneFormContext,
+} from './contexts';
 
 const queryParams = () => {
   const params = new URLSearchParams(window.location.search);
@@ -51,12 +57,17 @@ export const useBridgeListener = (
 ) => {
   useEffect(() => {
     return window.electron.addEventListener(channel, (
-      event: IpcRendererEvent,
+      _: IpcRendererEvent,
       ...args: any[]
     ) => {
       func(...args);
     });
-  }, [func, ...deps]);
+  }, [
+    func,
+    channel,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    ...deps,
+  ]);
 };
 
 export interface UseDelayedValueOptions {

@@ -92,7 +92,7 @@ const Provider = ({
     }
 
     dispatch({ selectedScene: scene._file, selectedItem: item });
-  }, []);
+  }, [state.selectedItem]);
 
   const resetSelection = useCallback(() => {
     dispatch({ selectedItem: undefined, selectedScene: undefined });
@@ -105,7 +105,7 @@ const Provider = ({
         s.id === scene?.id || s._file === scene?._file ? scene! : s
       )),
     });
-  }, [onCanvasChange, appPayload.scenes]);
+  }, [onCanvasChange, appPayload]);
 
   const onScriptsChange = useCallback((scripts: GameScript[]) => {
     onCanvasChange?.({
@@ -113,7 +113,7 @@ const Provider = ({
       scripts,
     });
     dispatch({ selectedItem: scripts.find(s => s === state.selectedItem) });
-  }, [onCanvasChange, appPayload]);
+  }, [onCanvasChange, appPayload, state.selectedItem]);
 
   const onScriptChange = useCallback((script: GameScript) => {
     onCanvasChange?.({

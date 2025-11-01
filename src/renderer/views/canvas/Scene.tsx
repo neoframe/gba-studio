@@ -50,7 +50,7 @@ const Scene = ({
   ...rest
 }: SceneProps) => {
   const { zoom, mouseX, offsetX, mouseY, offsetY } = useInfiniteCanvas();
-  const { projectBase, project } = useApp();
+  const { project } = useApp();
   const { selectedScene, selectedItem, tool } = useCanvas();
   const [size, setSize] = useState([240, 160]);
 
@@ -61,11 +61,11 @@ const Scene = ({
         y: Math.round((mouseY - offsetY) / zoom),
       }
       : project?.scenes?.find(s => s._file === scene._file)
-  ), [project, scene, preview, mouseX, mouseY]);
+  ), [project, mouseX, mouseY, offsetX, offsetY, zoom, scene, preview]);
 
   const backgroundPath = useMemo(() => scene.background ? (
     `project://graphics/${scene.background}.bmp`
-  ) : '', [projectBase, scene.background]);
+  ) : '', [scene.background]);
 
   const updateSize = useCallback(async () => {
     if (scene.map) {
@@ -109,7 +109,7 @@ const Scene = ({
     e.preventDefault();
     e.stopPropagation();
     onSelect?.(scene);
-  }, [onSelect, scene, selectedScene]);
+  }, [onSelect, scene]);
 
   const onMovedSensor = useCallback((sensor: GameSensor, e: MoveableState) => {
     sensor.x = pixelToTile(e.deltaX, gridSize);
@@ -130,7 +130,7 @@ const Scene = ({
     e.preventDefault();
     e.stopPropagation();
     onSelectItem?.(scene, scene.player);
-  }, [onSelectItem, scene, scene.player]);
+  }, [onSelectItem, scene]);
 
   const onMovedActor = useCallback((actor: GameActor, e: MoveableState) => {
     actor.x = pixelToTile(e.deltaX, gridSize);

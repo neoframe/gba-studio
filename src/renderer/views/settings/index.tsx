@@ -40,7 +40,7 @@ const Settings = () => {
   ) => {
     set(state.project, name, e.target.value);
     dispatch({ project: state.project });
-  }, []);
+  }, [state.project]);
 
   const onFieldBlur = useCallback(() => {
     onProjectChange?.(state.project);

@@ -31,7 +31,7 @@ const EventValueField = ({
     } else if (isDynamicValue && type === 'value') {
       onValueChange?.('');
     }
-  }, [onValueChange, isDynamicValue, val]);
+  }, [onValueChange, isDynamicValue]);
 
   const onTextChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (isDynamicValue) {

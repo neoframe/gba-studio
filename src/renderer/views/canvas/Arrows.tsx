@@ -11,7 +11,7 @@ export interface ArrowsProps {
 
 const Arrows = ({
   gridSize = 16,
-}) => {
+}: ArrowsProps) => {
   const { scenes, scripts } = useApp();
   const { selectedScene } = useCanvas();
 
@@ -36,7 +36,7 @@ const Arrows = ({
         GoToSceneEvent
       >('go-to-scene', sensor.events || [], { scripts }),
     ]).filter(([_, events]) => !!events.length) || []
-  ), [scenes, scripts, selectedScene]);
+  ), [scripts, selectedScene]);
 
   return (
     <>
