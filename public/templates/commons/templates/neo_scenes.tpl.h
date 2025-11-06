@@ -53,11 +53,13 @@ namespace neo::scenes
 
   // Map collisions
   {{#if this.map}}
-  int {{slug this.name}}_map_collisions[{{multiply this.map.width this.map.height}}] = {
+  {{#if (hasItems this.map.collisions)}}
+  int {{slug this.name}}_map_collisions[{{multiply (valuedef this.map.width 0) (valuedef this.map.height 0)}}] = {
     {{#each this.map.collisions}}
     {{this}}{{#unless @last}},{{/unless}}
     {{/each}}
   };
+  {{/if}}
 
   // Map sensors
   {{#if (hasItems this.map.sensors)}}
@@ -98,10 +100,10 @@ namespace neo::scenes
   // Map
   neo::types::map {{slug this.name}}_map_data = {
     {{#if this.map}}
-    {{this.map.width}},
-    {{this.map.height}},
+    {{valuedef this.map.width 0}},
+    {{valuedef this.map.height 0}},
     {{valuedef this.map.gridSize 16}},
-    {{#if this.map.collisions}}
+    {{#if (hasItems this.map.collisions)}}
     {{slug this.name}}_map_collisions,
     {{else}}
     nullptr,
@@ -109,7 +111,7 @@ namespace neo::scenes
     {{else}}
     0, 0, 0, nullptr,
     {{/if}}
-    {{#if this.map.sensors}}
+    {{#if (hasItems this.map.sensors)}}
     {{this.map.sensors.length}},
     {{slug this.name}}_map_sensors
     {{else}}

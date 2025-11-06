@@ -20,7 +20,7 @@ import type {
   GameScene,
   GameSensor,
 } from '../../../types';
-import { useApp, useCanvas } from '../../services/hooks';
+import { useApp, useCanvas, useEditor } from '../../services/hooks';
 import { getImageSize, pixelToTile } from '../../../helpers';
 import Actor from './Actor';
 import Sensor from './Sensor';
@@ -50,8 +50,9 @@ const Scene = ({
   ...rest
 }: SceneProps) => {
   const { zoom, mouseX, offsetX, mouseY, offsetY } = useInfiniteCanvas();
-  const { project } = useApp();
+  const { project, resourcesPath, backgrounds } = useApp();
   const { selectedScene, selectedItem, tool } = useCanvas();
+  const { setTilePosition } = useEditor();
   const [size, setSize] = useState([240, 160]);
 
   const sceneConfig = useMemo(() => (
@@ -63,27 +64,25 @@ const Scene = ({
       : project?.scenes?.find(s => s._file === scene._file)
   ), [project, mouseX, mouseY, offsetX, offsetY, zoom, scene, preview]);
 
-  const backgroundPath = useMemo(() => scene.background ? (
-    `project://graphics/${scene.background}.bmp`
-  ) : '', [scene.background]);
+  const background = useMemo(() => (
+    backgrounds.find(bg => bg._file === scene.background + '.json')
+  ), [backgrounds, scene.background]);
+
+  const backgroundPath = useMemo(() => (
+    !background?._file
+      ? `file://${resourcesPath}/public/templates/` +
+        `commons/graphics/bg_default.bmp`
+      : `project://graphics/${scene.background}.bmp`
+  ), [scene.background, background?._file, resourcesPath]);
 
   const updateSize = useCallback(async () => {
-    if (scene.map) {
-      setSize([
-        Math.max(240, (scene.map.width || 0) * (scene.map.gridSize || 16)),
-        Math.max(160, (scene.map.height || 0) * (scene.map.gridSize || 16)),
-      ]);
-
-      return;
-    }
-
     try {
       const [width, height] = await getImageSize(backgroundPath);
       setSize([Math.max(240, width), Math.max(160, height)]);
     } catch {
       setSize([240, 160]);
     }
-  }, [backgroundPath, scene.map]);
+  }, [backgroundPath]);
 
   useEffect(() => {
     updateSize();
@@ -149,11 +148,27 @@ const Scene = ({
 
   const onMovedPlayer = useCallback((e: MoveableState) => {
     scene.player = scene.player || { type: 'player', x: 0, y: 0 };
-
     scene.player.x = pixelToTile(e.deltaX, gridSize);
     scene.player.y = pixelToTile(e.deltaY, gridSize);
     onChange?.(scene);
   }, [onChange, scene, gridSize]);
+
+  const onMouseMove = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    const realMouseX = (e.clientX - offsetX) / zoom;
+    const realMouseY = (e.clientY - offsetY) / zoom;
+
+    setTilePosition(
+      pixelToTile((realMouseX - (sceneConfig?.x ?? 0)), gridSize),
+      pixelToTile((realMouseY - (sceneConfig?.y ?? 0)), gridSize),
+    );
+  }, [
+    offsetX, offsetY, zoom, gridSize, sceneConfig,
+    setTilePosition,
+  ]);
+
+  const onMouseOut = useCallback(() => {
+    setTilePosition();
+  }, [setTilePosition]);
 
   return (
     <Moveable
@@ -192,6 +207,8 @@ const Scene = ({
             width: size[0],
             height: size[1],
           }}
+          onMouseMove={onMouseMove}
+          onMouseOut={onMouseOut}
         >
           { collisions?.map((line, y) => (
             line.map((cell, x) => (

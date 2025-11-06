@@ -47,6 +47,8 @@ const LeftSidebar = ({
     view,
     leftSidebarOpened,
     leftSidebarWidth,
+    tileX,
+    tileY,
     setView,
     toggleLeftSidebar,
     setLeftSidebarWidth,
@@ -193,29 +195,44 @@ const LeftSidebar = ({
             className={classNames(
               'w-full h-full bg-seashell dark:bg-onyx z-10',
               'before:!rounded-[26px] after:!rounded-[26px] !rounded-[26px]',
-              '!pt-12'
+              '!pt-12 !pb-0'
             )}
           >
-            <Tabs.Root
-              value={view}
-              className="h-full flex flex-col"
-              onValueChange={onTabChange}
-            >
-              <Inset side="all">
-                <Tabs.List>
-                  { views.map(({ name, title, icon: Icon }) => (
-                    <Tabs.Trigger key={name} value={name || ''}>
-                      <Tooltip side="bottom" content={title}>
-                        { Icon ? <Icon /> : <Text>Unknown</Text> }
-                      </Tooltip>
-                    </Tabs.Trigger>
-                  )) }
-                </Tabs.List>
-                <ScrollArea className="!w-full" scrollbars="vertical">
-                  { children }
-                </ScrollArea>
-              </Inset>
-            </Tabs.Root>
+            <Inset side="x" className="h-full flex flex-col">
+              <Tabs.Root
+                value={view}
+                className="flex-auto overflow-y-hidden overflow-x-visible"
+                onValueChange={onTabChange}
+              >
+                <div
+                  className="h-full flex flex-col overflow-hidden"
+                >
+                  <Tabs.List className="flex-none">
+                    { views.map(({ name, title, icon: Icon }) => (
+                      <Tabs.Trigger key={name} value={name || ''}>
+                        <Tooltip side="bottom" content={title}>
+                          { Icon ? <Icon /> : <Text>Unknown</Text> }
+                        </Tooltip>
+                      </Tabs.Trigger>
+                    )) }
+                  </Tabs.List>
+                  <ScrollArea className="!w-full !flex-auto">
+                    { children }
+                  </ScrollArea>
+                </div>
+              </Tabs.Root>
+              <div
+                className={classNames(
+                  'bg-gondola flex-none h-8 flex items-center justify-center',
+                )}
+              >
+                <Text size="1" className="text-slate">
+                  { (tileX ?? -1) >= 0 && (tileY ?? -1) >= 0
+                    ? `Tile: (${tileX}, ${tileY})`
+                    : 'Tile: —' }
+                </Text>
+              </div>
+            </Inset>
           </Card>
         </div>
       </Resizable>

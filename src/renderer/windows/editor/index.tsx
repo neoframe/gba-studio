@@ -18,6 +18,8 @@ export interface EditorState {
   rightSidebarWidth: number;
   bottomBarOpened: boolean;
   bottomBarHeight: number;
+  tileX?: number;
+  tileY?: number;
 }
 
 const Editor = () => {
@@ -29,6 +31,8 @@ const Editor = () => {
     rightSidebarWidth: 300,
     bottomBarOpened: true,
     bottomBarHeight: 300,
+    tileX: undefined,
+    tileY: undefined,
   });
 
   // TODO: re-enable when preview works
@@ -74,6 +78,10 @@ const Editor = () => {
     dispatch({ bottomBarHeight: height });
   }, []);
 
+  const setTilePosition = useCallback((x?: number, y?: number) => {
+    dispatch({ tileX: x, tileY: y });
+  }, []);
+
   useHotkeys('mod+right', () => {
     toggleRightSidebar();
   }, [toggleRightSidebar]);
@@ -94,6 +102,8 @@ const Editor = () => {
     rightSidebarWidth: state.rightSidebarWidth,
     bottomBarOpened: state.bottomBarOpened,
     bottomBarHeight: state.bottomBarHeight,
+    tileX: state.tileX,
+    tileY: state.tileY,
     setView,
     toggleLeftSidebar,
     setLeftSidebarWidth,
@@ -101,12 +111,13 @@ const Editor = () => {
     setRightSidebarWidth,
     toggleBottomBar,
     setBottomBarHeight,
+    setTilePosition,
   }), [
     state.view, state.leftSidebarOpened, state.leftSidebarWidth,
     state.rightSidebarWidth, state.bottomBarOpened, state.bottomBarHeight,
-    state.rightSidebarOpened,
+    state.rightSidebarOpened, state.tileX, state.tileY,
     setView, toggleLeftSidebar, setLeftSidebarWidth, setRightSidebarWidth,
-    toggleRightSidebar, setBottomBarHeight, toggleBottomBar,
+    toggleRightSidebar, setBottomBarHeight, toggleBottomBar, setTilePosition,
   ]);
 
   return (

@@ -57,6 +57,8 @@ export interface EditorContextType {
   rightSidebarWidth: number;
   bottomBarOpened: boolean;
   bottomBarHeight: number;
+  tileX?: number;
+  tileY?: number;
   setView(view: string): void;
   toggleLeftSidebar(): void;
   setLeftSidebarWidth(width: number): void;
@@ -64,6 +66,7 @@ export interface EditorContextType {
   setRightSidebarWidth(width: number): void;
   toggleBottomBar(): void;
   setBottomBarHeight(height: number): void;
+  setTilePosition(x?: number, y?: number): void;
 }
 
 export const EditorContext = createContext<EditorContextType>({
@@ -81,6 +84,7 @@ export const EditorContext = createContext<EditorContextType>({
   toggleRightSidebar: () => {},
   setBottomBarHeight: _ => {},
   toggleBottomBar: () => {},
+  setTilePosition: () => {},
 });
 
 export interface CanvasContextType {
