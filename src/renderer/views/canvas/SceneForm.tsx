@@ -6,6 +6,7 @@ import {
   Separator,
   Tabs,
   Text,
+  TextField,
 } from '@radix-ui/themes';
 import { classNames, set } from '@junipero/react';
 
@@ -53,7 +54,15 @@ const SceneForm = ({
     const img = new Image();
 
     img.onload = () => {
-      if (scene.map && scene.sceneType !== 'logos') {
+      scene.map = scene.map || {
+        type: 'map',
+        gridSize: 16,
+        width: 0,
+        height: 0,
+      };
+
+      if (scene.sceneType !== 'logos') {
+        scene.map.gridSize = scene.map.gridSize || 16;
         scene.map.width = pixelToTile(img.width,
           scene.map.gridSize);
         scene.map.height = pixelToTile(img.height,
@@ -65,6 +74,17 @@ const SceneForm = ({
 
     img.src = `project://graphics/${value}.bmp`;
   }, [scene, onValueChange]);
+
+  const onTypeChange = useCallback((name: string, value: string) => {
+
+    if (value !== scene.sceneType) {
+      set(scene, name, value);
+      onBackgroundChange(scene.background || '');
+    } else {
+      set(scene, name, value);
+      onChange?.(scene);
+    }
+  }, [onBackgroundChange, onChange, scene]);
 
   const onNameKeyDown = (e: KeyboardEvent<HTMLHeadingElement>) => {
     e.stopPropagation();
@@ -103,7 +123,7 @@ const SceneForm = ({
             <Text className="block text-slate" size="1">Scene type</Text>
             <Select.Root
               value={scene?.sceneType ?? 'logos'}
-              onValueChange={onValueChange.bind(null, 'sceneType')}
+              onValueChange={onTypeChange.bind(null, 'sceneType')}
             >
               <Select.Trigger className="w-full" />
               <Select.Content>
@@ -126,7 +146,9 @@ const SceneForm = ({
                 type="number"
                 value={scene.map?.gridSize ?? 16}
                 onValueChange={onValueChange.bind(null, 'map.gridSize')}
-              />
+              >
+                <TextField.Slot side="right">px</TextField.Slot>
+              </EventValueField>
             </div>
           ) }
         </div>

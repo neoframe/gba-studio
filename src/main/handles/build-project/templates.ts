@@ -32,7 +32,7 @@ export const setupHandlebars = async () => {
   Handlebars.registerHelper('preserveLineBreaks', (str: string) =>
     str.replace(/\n/g, '\\n'));
   Handlebars.registerHelper('valuedef', (trueValue, falseValue) =>
-    typeof trueValue !== 'undefined' && trueValue !== null
+    typeof trueValue !== 'undefined' && trueValue !== null && trueValue !== ''
       ? trueValue : falseValue);
 
   // Add partials

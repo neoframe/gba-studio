@@ -4,6 +4,7 @@
 #include <bn_camera_actions.h>
 #include <bn_sprite_tiles_ptr.h>
 #include <bn_sprite_animate_actions.h>
+#include <bn_sprite_item.h>
 
 #include <bn_sprite_items_sprite_default.h>
 
@@ -16,6 +17,7 @@ namespace neo
 {
   player::player():
       sprite(bn::sprite_items::sprite_default.create_sprite(0, 0)),
+      tiles(bn::sprite_items::sprite_default.tiles_item()),
       position(0, 0),
       direction(neo::types::direction::DOWN),
       map(nullptr)
@@ -25,30 +27,37 @@ namespace neo
     sprite.set_z_order(1);
   }
 
-  void player::play(neo::types::map& map_, int start_tile_x, int start_tile_y, neo::types::direction start_direction)
+  void player::play(neo::types::map& map_, int start_tile_x, int start_tile_y, neo::types::direction start_direction, bn::sprite_ptr sprite_, bn::sprite_tiles_item tiles_)
   {
+    sprite = sprite_;
+    sprite.set_bg_priority(1);
+    sprite.set_z_order(1);
     sprite.set_camera(game->camera);
+
+    tiles = tiles_;
+
     set_map(map_);
     set_position(bn::fixed_point(map->to_pixel_x(start_tile_x), map->to_pixel_y(start_tile_y)));
+
     direction = start_direction;
 
     if (start_direction == neo::types::direction::LEFT)
     {
-        sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::LEFT));
+        sprite.set_tiles(tiles.create_tiles(neo::tileindex::LEFT));
         sprite.set_horizontal_flip(true);
     }
     else if (start_direction == neo::types::direction::RIGHT)
     {
-      sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::RIGHT));
+      sprite.set_tiles(tiles.create_tiles(neo::tileindex::RIGHT));
       sprite.set_horizontal_flip(false);
     }
     else if (start_direction == neo::types::direction::UP)
     {
-      sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::UP));
+      sprite.set_tiles(tiles.create_tiles(neo::tileindex::UP));
     }
     else
     {
-      sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::DOWN));
+      sprite.set_tiles(tiles.create_tiles(neo::tileindex::DOWN));
     }
 
     sprite.set_visible(true);
@@ -79,8 +88,9 @@ namespace neo
 
     if (bn::keypad::left_pressed() || bn::keypad::left_held())
     {
+      BN_LOG("Left key pressed/held");
       direction = neo::types::direction::LEFT;
-      sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::LEFT));
+      sprite.set_tiles(tiles.create_tiles(neo::tileindex::LEFT));
       sprite.set_horizontal_flip(true);
 
       if (bn::keypad::left_held())
@@ -88,7 +98,7 @@ namespace neo
         bn::sprite_animate_action<4> action = bn::create_sprite_animate_action_forever(
           sprite,
           ANIMATION_FPS,
-          bn::sprite_items::sprite_default.tiles_item(),
+          tiles,
           8, 2, 9, 2
         );
 
@@ -98,13 +108,14 @@ namespace neo
         }
 
         action.reset();
-        sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::LEFT));
+        sprite.set_tiles(tiles.create_tiles(neo::tileindex::LEFT));
       }
     }
     else if (bn::keypad::right_pressed() || bn::keypad::right_held())
     {
+      BN_LOG("Right key pressed/held");
       direction = neo::types::direction::RIGHT;
-      sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::RIGHT));
+      sprite.set_tiles(tiles.create_tiles(neo::tileindex::RIGHT));
       sprite.set_horizontal_flip(false);
 
       if (bn::keypad::right_held())
@@ -112,7 +123,7 @@ namespace neo
         bn::sprite_animate_action<4> action = bn::create_sprite_animate_action_forever(
           sprite,
           ANIMATION_FPS,
-          bn::sprite_items::sprite_default.tiles_item(),
+          tiles,
           8, 2, 9, 2
         );
 
@@ -122,21 +133,22 @@ namespace neo
         }
 
         action.reset();
-        sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::RIGHT));
+        sprite.set_tiles(tiles.create_tiles(neo::tileindex::RIGHT));
       }
     }
 
     if (bn::keypad::up_pressed() || bn::keypad::up_held())
     {
+      BN_LOG("Up key pressed/held");
       direction = neo::types::direction::UP;
-      sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::UP));
+      sprite.set_tiles(tiles.create_tiles(neo::tileindex::UP));
 
       if (bn::keypad::up_held())
       {
         bn::sprite_animate_action<4> action = bn::create_sprite_animate_action_forever(
           sprite,
           ANIMATION_FPS,
-          bn::sprite_items::sprite_default.tiles_item(),
+          tiles,
           6, 1, 7, 1
         );
 
@@ -146,20 +158,21 @@ namespace neo
         }
 
         action.reset();
-        sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::UP));
+        sprite.set_tiles(tiles.create_tiles(neo::tileindex::UP));
       }
     }
     else if (bn::keypad::down_pressed() || bn::keypad::down_held())
     {
+      BN_LOG("Down key pressed/held");
       direction = neo::types::direction::DOWN;
-      sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::DOWN));
+      sprite.set_tiles(tiles.create_tiles(neo::tileindex::DOWN));
 
       if (bn::keypad::down_held())
       {
         bn::sprite_animate_action<4> action = bn::create_sprite_animate_action_forever(
           sprite,
           ANIMATION_FPS,
-          bn::sprite_items::sprite_default.tiles_item(),
+          tiles,
           4, 0, 5, 0
         );
 
@@ -169,7 +182,7 @@ namespace neo
         }
 
         action.reset();
-        sprite.set_tiles(bn::sprite_items::sprite_default.tiles_item().create_tiles(neo::tileindex::DOWN));
+        sprite.set_tiles(tiles.create_tiles(neo::tileindex::DOWN));
       }
     }
   }
