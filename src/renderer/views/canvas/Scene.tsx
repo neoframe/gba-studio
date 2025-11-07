@@ -170,6 +170,42 @@ const Scene = ({
     setTilePosition();
   }, [setTilePosition]);
 
+  const onTileClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    if (!scene.map) {
+      return;
+    }
+
+    const realMouseX = (e.clientX - offsetX) / zoom;
+    const realMouseY = (e.clientY - offsetY) / zoom;
+
+    const x = pixelToTile((realMouseX - (sceneConfig?.x ?? 0)), gridSize);
+    const y = pixelToTile((realMouseY - (sceneConfig?.y ?? 0)), gridSize);
+
+    if (tool === 'collisions') {
+      const c = collisions;
+
+      if (!c) {
+        return;
+      }
+
+      switch (e.button) {
+        case 0:
+          c[y][x] = '1';
+          break;
+        case 2:
+          c[y][x] = '0';
+          break;
+      }
+
+      scene.map.collisions = c.map(line => line.join(','));
+    }
+
+    onChange?.(scene);
+  }, [
+    collisions, gridSize, offsetX, offsetY, onChange,
+    scene, sceneConfig, tool, zoom,
+  ]);
+
   return (
     <Moveable
       { ...rest }
@@ -209,6 +245,7 @@ const Scene = ({
           }}
           onMouseMove={onMouseMove}
           onMouseOut={onMouseOut}
+          onMouseDown={onTileClick}
         >
           { collisions?.map((line, y) => (
             line.map((cell, x) => (
