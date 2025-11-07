@@ -10,8 +10,8 @@ import {
   type MoveableProps,
   Moveable,
   classNames,
-  useInfiniteCanvas,
   mockState,
+  useInfiniteCanvas,
 } from '@junipero/react';
 import { Card } from '@radix-ui/themes';
 
@@ -87,7 +87,7 @@ const Scene = ({
   const updateSize = useCallback(async () => {
     try {
       const [width, height] = await getImageSize(backgroundPath);
-      dispatch({ size: [Math.max(240, width), Math.max(160, height)]});
+      dispatch({ size: [Math.max(240, width), Math.max(160, height)] });
     } catch {
       dispatch({ size: [240, 160] });
     }
@@ -162,6 +162,20 @@ const Scene = ({
     onChange?.(scene);
   }, [onChange, scene, gridSize]);
 
+  const applyCollision = useCallback((cell: string, button: number): string => {
+    const buttonToValue: Record<number, '0' | '1'> = {
+      1: '1', // Left button
+      2: '0', // Right button
+    };
+    const value = buttonToValue[button];
+
+    if (value === undefined || cell === value) {
+      return cell;
+    }
+
+    return value;
+  }, []);
+
   const onMouseMove = useCallback((e: MouseEvent<HTMLDivElement>) => {
     const realMouseX = (e.clientX - offsetX) / zoom;
     const realMouseY = (e.clientY - offsetY) / zoom;
@@ -174,6 +188,15 @@ const Scene = ({
       const c = collisions;
 
       if (!c) {
+        return;
+      }
+
+      if (
+        y < 0 ||
+        y >= c.length ||
+        x < 0 ||
+        x >= c[y]?.length
+      ) {
         return;
       }
 
@@ -191,7 +214,7 @@ const Scene = ({
 
   }, [
     offsetX, offsetY, zoom, gridSize, sceneConfig, setTilePosition,
-    state.isMouseDown, scene, tool, onChange, collisions,
+    state.isMouseDown, scene, tool, onChange, collisions, applyCollision,
   ]);
 
   const onMouseOut = useCallback(() => {
@@ -199,6 +222,10 @@ const Scene = ({
   }, [setTilePosition]);
 
   const onMouseDown = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    if (tool !== 'collisions') {
+      return;
+    }
+
     e.preventDefault();
     e.stopPropagation();
     dispatch({ isMouseDown: true });
@@ -213,37 +240,29 @@ const Scene = ({
     const x = pixelToTile((realMouseX - (sceneConfig?.x ?? 0)), gridSize);
     const y = pixelToTile((realMouseY - (sceneConfig?.y ?? 0)), gridSize);
 
-    if (tool === 'collisions') {
-      const c = collisions;
+    const c = collisions;
 
-      if (!c) {
-        return;
-      }
+    if (!c) {
+      return;
+    }
 
+    if (
+      y >= 0 && y < c.length &&
+      x >= 0 && x < c[y].length
+    ) {
       c[y][x] = applyCollision(c[y][x], e.buttons);
-
       scene.map.collisions = c.map(line => line.join(','));
     }
 
     onChange?.(scene);
   }, [
     collisions, gridSize, offsetX, offsetY, onChange,
-    scene, sceneConfig, tool, zoom,
+    scene, sceneConfig, tool, zoom, applyCollision,
   ]);
 
-  const applyCollision = (cell: string, button: number): string => {
-    const buttonToValue: Record<number, '0' | '1'> = {
-      1: '1', // Left button
-      2: '0', // Right button
-    };
-    const value = buttonToValue[button];
-
-    if (value === undefined || cell === value) {
-      return cell;
-    }
-
-    return value;
-  };
+  const onMouseUp = useCallback(() => {
+    dispatch({ isMouseDown: false });
+  }, []);
 
   return (
     <Moveable
@@ -285,7 +304,7 @@ const Scene = ({
           onMouseMove={onMouseMove}
           onMouseOut={onMouseOut}
           onMouseDown={onMouseDown}
-          onMouseUp={() => dispatch({ isMouseDown: false })}
+          onMouseUp={onMouseUp}
         >
           { collisions?.map((line, y) => (
             line.map((cell, x) => (
