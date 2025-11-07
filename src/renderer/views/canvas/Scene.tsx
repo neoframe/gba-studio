@@ -12,6 +12,7 @@ import {
   classNames,
   mockState,
   useInfiniteCanvas,
+  useEventListener,
 } from '@junipero/react';
 import { Card } from '@radix-ui/themes';
 
@@ -211,7 +212,6 @@ const Scene = ({
       scene.map.collisions = c.map(line => line.join(','));
       onChange?.(scene);
     }
-
   }, [
     offsetX, offsetY, zoom, gridSize, sceneConfig, setTilePosition,
     state.isMouseDown, scene, tool, onChange, collisions, applyCollision,
@@ -222,17 +222,13 @@ const Scene = ({
   }, [setTilePosition]);
 
   const onMouseDown = useCallback((e: MouseEvent<HTMLDivElement>) => {
-    if (tool !== 'collisions') {
+    if (tool !== 'collisions' || !scene.map || !collisions) {
       return;
     }
 
     e.preventDefault();
     e.stopPropagation();
     dispatch({ isMouseDown: true });
-
-    if (!scene.map) {
-      return;
-    }
 
     const realMouseX = (e.clientX - offsetX) / zoom;
     const realMouseY = (e.clientY - offsetY) / zoom;
@@ -260,9 +256,13 @@ const Scene = ({
     scene, sceneConfig, tool, zoom, applyCollision,
   ]);
 
-  const onMouseUp = useCallback(() => {
+  useEventListener('mouseup', () => {
+    if (!state.isMouseDown) {
+      return;
+    }
+
     dispatch({ isMouseDown: false });
-  }, []);
+  }, [state.isMouseDown]);
 
   return (
     <Moveable
@@ -304,7 +304,6 @@ const Scene = ({
           onMouseMove={onMouseMove}
           onMouseOut={onMouseOut}
           onMouseDown={onMouseDown}
-          onMouseUp={onMouseUp}
         >
           { collisions?.map((line, y) => (
             line.map((cell, x) => (
