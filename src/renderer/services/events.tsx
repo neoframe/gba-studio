@@ -27,6 +27,7 @@ import type {
 } from '../../types';
 
 export interface EventDefinition extends ListItem {
+  keywords?: string[];
   construct?: (params?: any) => any;
 }
 
@@ -36,11 +37,13 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     icon: MixIcon,
     name: 'Wait For Button',
     value: 'wait-for-button',
+    keywords: ['button', 'input', 'press'],
     construct: () => ({ type: 'wait-for-button', buttons: [], every: false }),
   }, {
     icon: AllSidesIcon,
     name: 'On Button Press',
     value: 'on-button-press',
+    keywords: ['button', 'input', 'press'],
     construct: () => ({ type: 'on-button-press', buttons: [], events: [] }),
   }],
 }, {
@@ -49,11 +52,13 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     icon: ShadowIcon,
     name: 'Fade In',
     value: 'fade-in',
+    keywords: ['camera', 'fade', 'in'],
     construct: () => ({ type: 'fade-in', duration: 200 }),
   }, {
     icon: ShadowNoneIcon,
     name: 'Fade Out',
     value: 'fade-out',
+    keywords: ['camera', 'fade', 'out'],
     construct: () => ({ type: 'fade-out', duration: 200 }),
   }],
 }, {
@@ -62,6 +67,7 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     icon: LayersIcon,
     name: 'Go To Scene',
     value: 'go-to-scene',
+    keywords: ['scene', 'change', 'go to', 'goto', 'switch'],
     construct: () => ({
       type: 'go-to-scene',
       target: '',
@@ -73,6 +79,7 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     icon: ChatBubbleIcon,
     name: 'Show Dialog',
     value: 'show-dialog',
+    keywords: ['dialog', 'text', 'speech', 'talk'],
     construct: () => ({
       type: 'show-dialog',
       text: '',
@@ -84,6 +91,7 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     icon: EyeClosedIcon,
     name: 'Disable Actor',
     value: 'disable-actor',
+    keywords: ['actor', 'disable'],
     construct: () => ({
       type: 'disable-actor',
       actor: '',
@@ -92,6 +100,7 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     icon: EyeOpenIcon,
     name: 'Enable Actor',
     value: 'enable-actor',
+    keywords: ['actor', 'enable'],
     construct: () => ({
       type: 'enable-actor',
       actor: '',
@@ -103,6 +112,7 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     icon: Pencil1Icon,
     name: 'Set Variable',
     value: 'set-variable',
+    keywords: ['variable', 'set', 'change', 'value'],
     construct: () => ({
       type: 'set-variable',
       name: '',
@@ -115,6 +125,7 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     icon: PlayIcon,
     name: 'Play Music',
     value: 'play-music',
+    keywords: ['music', 'play', 'sound'],
     construct: () => ({
       type: 'play-music',
       music_name: '',
@@ -124,6 +135,7 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     icon: StopIcon,
     name: 'Stop Music',
     value: 'stop-music',
+    keywords: ['music', 'stop', 'sound'],
     construct: () => ({
       type: 'stop-music',
     }),
@@ -131,6 +143,7 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     icon: SpeakerLoudIcon,
     name: 'Play Sound',
     value: 'play-sound',
+    keywords: ['sound', 'play', 'sfx'],
     construct: () => ({
       type: 'play-sound',
     }),
@@ -140,12 +153,14 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
   items: [{
     icon: LapTimerIcon,
     name: 'Wait for X milliseconds',
+    keywords: ['wait', 'timer', 'delay'],
     value: 'wait',
     construct: () => ({ type: 'wait', duration: 500 }),
   }, {
     icon: GroupIcon,
     name: 'If',
     value: 'if',
+    keywords: ['if', 'condition', 'check'],
     construct: () => ({
       type: 'if',
       conditions: [],
@@ -156,6 +171,7 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     icon: CodeIcon,
     name: 'Execute Script',
     value: 'execute-script',
+    keywords: ['script', 'code', 'execute'],
     construct: () => ({
       type: 'execute-script',
     }),
