@@ -1,5 +1,12 @@
 import { type ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { Dialog, Inset, ScrollArea, Spinner, Text, TextField } from '@radix-ui/themes';
+import {
+  Dialog,
+  Inset,
+  ScrollArea,
+  Spinner,
+  Text,
+  TextField,
+} from '@radix-ui/themes';
 import { classNames } from '@junipero/react';
 
 import { AVAILABLE_EVENTS } from '../../services/events';
@@ -14,7 +21,7 @@ const Catalogue = ({
 }: CatalogueProps) => {
   const [rawSearch, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
-  const search = useDelayedValue(rawSearch);
+  const search = useDelayedValue(rawSearch, { delay: 200 });
 
   useEffect(() => {
     setLoading(true);
@@ -28,8 +35,9 @@ const Catalogue = ({
     AVAILABLE_EVENTS.map(c => ({
       ...c,
       items: c.items.filter(i => (
-        i.name.toLowerCase().includes(search.toLowerCase())
-        || i.value.toLowerCase().includes(search.toLowerCase())
+        i.name.toLowerCase().includes(search.toLowerCase()) ||
+        i.value.toLowerCase().includes(search.toLowerCase()) ||
+        i.keywords?.some(k => k.toLowerCase().includes(search.toLowerCase()))
       )),
     }))
   ), [search]);

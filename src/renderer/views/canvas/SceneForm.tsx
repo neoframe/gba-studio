@@ -6,12 +6,14 @@ import {
   Separator,
   Tabs,
   Text,
+  TextField,
 } from '@radix-ui/themes';
 import { classNames, set } from '@junipero/react';
 
 import type { GameScene } from '../../../types';
-import { getGraphicName, pixelToTile } from '../../../helpers';
+import { getGraphicName, getImageSize, pixelToTile } from '../../../helpers';
 import { SceneFormContext } from '../../services/contexts';
+import { useApp } from '../../services/hooks';
 import BackgroundsListField from '../../components/BackgroundsListField';
 import EventsField from '../../components/EventsField';
 import EventValueField from '../../components/EventValueField';
@@ -31,6 +33,8 @@ const SceneForm = ({
   scene,
   onChange,
 }: SceneFormProps) => {
+  const { resourcesPath } = useApp();
+
   const onNameChange = useCallback((e: ChangeEvent<HTMLHeadingElement>) => {
     const name = (e.currentTarget.textContent || 'Untitled')
       .trim().slice(0, 32);
@@ -50,21 +54,39 @@ const SceneForm = ({
   }, [onChange, scene]);
 
   const onBackgroundChange = useCallback(async (value: string) => {
-    const img = new Image();
+    const [width, height] = await getImageSize(!value || value === 'bg_default'
+      ? `file://${resourcesPath}/public/templates/` +
+        `commons/graphics/bg_default.bmp`
+      : `project://graphics/${value}.bmp`);
 
-    img.onload = () => {
-      if (scene.map && scene.sceneType !== 'logos') {
-        scene.map.width = pixelToTile(img.width,
-          scene.map.gridSize);
-        scene.map.height = pixelToTile(img.height,
-          scene.map.gridSize);
-      }
-
-      onValueChange('background', getGraphicName(value));
+    scene.map = scene.map || {
+      type: 'map',
+      gridSize: 16,
+      width: 0,
+      height: 0,
     };
 
-    img.src = `project://graphics/${value}.bmp`;
-  }, [scene, onValueChange]);
+    if (scene.sceneType !== 'logos') {
+      scene.map.gridSize = scene.map.gridSize || 16;
+      scene.map.width = pixelToTile(width,
+        scene.map.gridSize);
+      scene.map.height = pixelToTile(height,
+        scene.map.gridSize);
+    }
+
+    onValueChange('background', getGraphicName(value || 'bg_default'));
+  }, [scene, resourcesPath, onValueChange]);
+
+  const onTypeChange = useCallback((name: string, value: string) => {
+
+    if (value !== scene.sceneType) {
+      set(scene, name, value);
+      onBackgroundChange(scene.background || '');
+    } else {
+      set(scene, name, value);
+      onChange?.(scene);
+    }
+  }, [onBackgroundChange, onChange, scene]);
 
   const onNameKeyDown = (e: KeyboardEvent<HTMLHeadingElement>) => {
     e.stopPropagation();
@@ -103,7 +125,7 @@ const SceneForm = ({
             <Text className="block text-slate" size="1">Scene type</Text>
             <Select.Root
               value={scene?.sceneType ?? 'logos'}
-              onValueChange={onValueChange.bind(null, 'sceneType')}
+              onValueChange={onTypeChange.bind(null, 'sceneType')}
             >
               <Select.Trigger className="w-full" />
               <Select.Content>
@@ -115,7 +137,7 @@ const SceneForm = ({
           <div className="flex flex-col gap-2">
             <Text className="block text-slate" size="1">Background</Text>
             <BackgroundsListField
-              value={scene?.background ?? ''}
+              value={scene?.background || ''}
               onValueChange={onBackgroundChange}
             />
           </div>
@@ -126,7 +148,9 @@ const SceneForm = ({
                 type="number"
                 value={scene.map?.gridSize ?? 16}
                 onValueChange={onValueChange.bind(null, 'map.gridSize')}
-              />
+              >
+                <TextField.Slot side="right">px</TextField.Slot>
+              </EventValueField>
             </div>
           ) }
         </div>

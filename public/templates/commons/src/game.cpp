@@ -107,7 +107,9 @@ namespace neo
         *active_scene->map_data,
         x,
         y,
-        dir
+        dir,
+        active_scene->player_sprite.create_sprite(0, 0),
+        active_scene->player_sprite.tiles_item()
       );
     }
 

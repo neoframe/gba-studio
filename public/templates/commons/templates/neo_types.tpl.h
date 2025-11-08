@@ -332,6 +332,7 @@ namespace neo::types
     bool has_player;
     int start_position[2];
     neo::types::direction start_direction;
+    bn::sprite_item player_sprite;
     // Map data
     map* map_data;
     // Actors

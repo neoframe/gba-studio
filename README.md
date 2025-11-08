@@ -4,6 +4,10 @@ GB Studio, but for the GBA
 
 ## Roadmap
 
+- [ ] Copy/paste events
+- [ ] Rename events
 - [ ] File changes detection outside of GBA Studio
 - [ ] PNG auto convert on build
-- [ ] Move starting point from any scene
+- [ ] Move target point from the target scene
+- [ ] Sprite animations editor
+- [ ] Sound editor

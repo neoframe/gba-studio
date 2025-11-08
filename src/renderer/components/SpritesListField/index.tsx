@@ -30,7 +30,7 @@ const SpritesListField = ({
               fallback=""
               className="[&>img]:pixelated"
             />
-            <Text>{ val ?? 'sprite_default' }</Text>
+            <Text>{ val || 'sprite_default' }</Text>
           </div>
         </Card>
       </DropdownMenu.Trigger>

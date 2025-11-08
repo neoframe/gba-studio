@@ -11,6 +11,11 @@
 #include <bn_regular_bg_items_bg_default.h>
 {{#each scenes}}
 #include <bn_regular_bg_items_{{valuedef this.background "bg_default"}}.h>
+{{#if this.player.sprite}}
+#include <bn_sprite_items_{{valuedef this.player.sprite "sprite_default"}}.h>
+{{else}}
+#include <bn_sprite_items_sprite_default.h>
+{{/if}}
 {{#each this.actors}}
 #include <bn_sprite_items_{{valuedef this.sprite "sprite_default"}}.h>
 {{/each}}
@@ -205,10 +210,12 @@ namespace neo::scenes
     true,
     { {{this.player.x}}, {{this.player.y}} },
     neo::types::direction::{{uppercase (valuedef this.player.direction 'down')}},
+    bn::sprite_items::{{valuedef this.player.sprite "sprite_default"}},
     {{else}}
     false,
     { 0, 0 },
     neo::types::direction::DOWN,
+    bn::sprite_items::sprite_default,
     {{/if}}
     {{#if this.map}}
     &{{slug this.name}}_map_data,
@@ -236,6 +243,7 @@ namespace neo::scenes
     false,
     { 0, 0 },
     neo::types::direction::DOWN,
+    bn::sprite_items::sprite_default,
     nullptr,
     0,
     nullptr
