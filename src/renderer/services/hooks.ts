@@ -1,5 +1,5 @@
 import type { IpcRendererEvent } from 'electron';
-import { useContext, useDeferredValue, useEffect, useState } from 'react';
+import { DependencyList, useContext, useDeferredValue, useEffect, useState } from 'react';
 import { useTimeout } from '@junipero/react';
 
 import {
@@ -105,7 +105,7 @@ export function useDelayedCallback<T extends (...args: any[]) => void> (
   /**
    * Effect dependencies
    */
-  deps: any[] = [],
+  deps: DependencyList = [],
 ) {
   const [args, setArgs] = useState<Parameters<T>>();
 

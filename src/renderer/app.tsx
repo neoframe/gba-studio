@@ -10,7 +10,7 @@ import type {
   GameScene,
 } from '../types';
 import { type AppContextType, AppContext } from './services/contexts';
-import { useBridgeListener, useQuery } from './services/hooks';
+import { useBridgeListener, useDelayedCallback, useQuery } from './services/hooks';
 import ProjectSelection from './windows/project-selection';
 import Editor from './windows/editor';
 
@@ -157,7 +157,7 @@ const App = () => {
     redo();
   }, [redo]);
 
-  const addToHistory = useCallback((currentState: AppState) => {
+  const addToHistory = useDelayedCallback((currentState: AppState) => {
     const newHistoryEntry: Partial<AppPayload> = {
       project: cloneDeep(currentState.project!),
       scenes: cloneDeep(currentState.scenes),
@@ -168,8 +168,8 @@ const App = () => {
     const newHistory = currentState.history.slice(currentState.historyIndex);
     newHistory.unshift(newHistoryEntry);
 
-    return newHistory.slice(0, 50);
-  }, []);
+    dispatch({ history: newHistory.slice(0, 50), historyIndex: 0 });
+  }, 400, []);
 
   const onMoveScene = useCallback((
     scene: GameScene,
@@ -200,28 +200,28 @@ const App = () => {
         });
       }
 
-      return { ...s, history: addToHistory(s), historyIndex: 0, dirty: true };
+      addToHistory(s);
+
+      return { ...s, dirty: true };
     });
   }, [addToHistory]);
 
   const onCanvasChange = useCallback((payload: Partial<AppPayload>) => {
-    dispatch(s => ({
-      ...s,
-      ...payload,
-      history: addToHistory(s),
-      historyIndex: 0,
-      dirty: true,
-    }));
+    dispatch(s => {
+      const res = { ...s, ...payload, dirty: true };
+      addToHistory(res);
+
+      return res;
+    });
   }, [addToHistory]);
 
   const onProjectChange = useCallback((project: GameProject) => {
-    dispatch(s => ({
-      ...s,
-      project,
-      history: addToHistory(s),
-      historyIndex: 0,
-      dirty: true,
-    }));
+    dispatch(s => {
+      const res = { ...s, project, dirty: true };
+      addToHistory(res);
+
+      return res;
+    });
   }, [addToHistory]);
 
   const setBuilding = useCallback((building: boolean) => {
