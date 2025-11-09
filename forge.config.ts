@@ -9,7 +9,9 @@ import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
 import 'dotenv/config';
+
 import removeLocalesPlugin from './.plugins/remove-locales';
+import removeVendorsPlugin from './.plugins/remove-vendors';
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -46,7 +48,12 @@ const config: ForgeConfig = {
         teamId: process.env.APPLE_TEAM_ID!,
       },
     },
-    afterCopy: [removeLocalesPlugin],
+    afterCopy: [
+      removeLocalesPlugin,
+    ],
+    afterCopyExtraResources: [
+      removeVendorsPlugin,
+    ],
     // ignore: [],
     // ignore: (file: string) => {
     //   if (!file) {

@@ -6,6 +6,7 @@ GB Studio, but for the GBA
 
 - [ ] Copy/paste events
 - [ ] Rename events
+- [ ] Foreground sprites
 - [ ] File changes detection outside of GBA Studio
 - [ ] PNG auto convert on build
 - [ ] Move target point from the target scene

@@ -1,6 +1,7 @@
 {
   "name": "gba-studio",
   "productName": "GBA Studio",
+  "executableName": "GBAStudio",
   "type": "module",
   "version": "0.1.0",
   "description": "GB Studio, but worse & for the GBA",
