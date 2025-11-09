@@ -5,14 +5,16 @@ import type { IpcMainInvokeEvent } from 'electron';
 
 import type { AppPayload } from '../../types';
 import { getSceneFiles, getScriptsFiles } from '../files';
-import { serializeScene } from '../serialize';
+import { serialize } from '../serialize';
+import { sanitize } from '../sanitize';
 
 export default async (
   _: IpcMainInvokeEvent,
   projectPath: string,
-  data: AppPayload
+  data: Partial<AppPayload>
 ) => {
   const projectDir = path.dirname(projectPath);
+  data = serialize(sanitize(data));
 
   // Save variables
   for (const variableSet of data.variables || []) {
@@ -46,7 +48,7 @@ export default async (
       delete scene._file;
 
       await fs.writeFile(path.join(projectDir, 'content', fileName),
-        JSON.stringify(serializeScene(scene), null, 2) + '\n', 'utf-8');
+        JSON.stringify(scene, null, 2) + '\n', 'utf-8');
     }
   }
 

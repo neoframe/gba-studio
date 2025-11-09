@@ -31,6 +31,24 @@ jobs:
           check-latest: true
       - name: Install dependencies
         run: yarn install
+
+      # OSX Sign
+      - name: Set up keychain and import signing certificate
+        if: matrix.label == 'darwin-arm64'
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.OSX_CERT_P12 }}
+          p12-password: ${{ secrets.OSX_CERT_PASSWORD }}
+      - name: Set signin environment
+        if: matrix.label == 'darwin-arm64'
+        run: |
+          echo "OSX_SIGN_ENABLED=true" >> $GITHUB_ENV
+          echo "OSX_SIGN_IDENTITY=${{ secrets.OSX_SIGN_IDENTITY }}" >> $GITHUB_ENV
+          echo "OSX_NOTARIZE_ENABLED=true" >> $GITHUB_ENV
+          echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> $GITHUB_ENV
+          echo "APPLE_ID_PASSWORD=${{ secrets.APPLE_ID_PASSWORD }}" >> $GITHUB_ENV
+          echo "APPLE_TEAM_ID=${{ secrets.APPLE_TEAM_ID }}" >> $GITHUB_ENV
+
       - name: Run build
         run: yarn package
       - name: Get package version

@@ -18,6 +18,8 @@ import {
   sendSuccessLog,
 } from './utils';
 import { buildTemplates, compileTemplate } from './templates';
+import { serialize } from '../../serialize';
+import { sanitize } from '../../sanitize';
 import Storage from '../../storage';
 
 const builds = new Map<string, Build>();
@@ -253,12 +255,17 @@ export function startBuildProject (
   storage: Storage,
   event: IpcMainInvokeEvent,
   projectPath: string,
-  data?: Partial<AppPayload>,
+  data: Partial<AppPayload>,
 ) {
   const buildId = randomUUID();
   latestBuildId = buildId;
   const controller = new AbortController();
-  const build: Build = { id: buildId, projectPath, controller, data };
+  const build: Build = {
+    id: buildId,
+    projectPath,
+    controller,
+    data: serialize(sanitize(data)),
+  };
 
   builds.set(buildId, build);
   event.sender.send('build-started', { id: buildId });

@@ -1,4 +1,4 @@
-import type { GameScene } from '../types';
+import type { AppPayload, GameScene } from '../types';
 
 export const serializeScene = (scene: GameScene): GameScene => {
   if (scene.map?.collisions?.length) {
@@ -24,4 +24,20 @@ export const unserializeScene = (scene: GameScene): GameScene => {
   }
 
   return scene;
+};
+
+export const serialize = (
+  payload: Partial<AppPayload>
+): Partial<AppPayload> => {
+  payload.scenes = payload.scenes?.map(scene => serializeScene(scene));
+
+  return payload;
+};
+
+export const unserialize = (
+  payload: Partial<AppPayload>
+): Partial<AppPayload> => {
+  payload.scenes = payload.scenes?.map(scene => unserializeScene(scene));
+
+  return payload;
 };

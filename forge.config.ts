@@ -21,10 +21,10 @@ const config: ForgeConfig = {
     extraResource: [
       './public',
     ],
-    ...process.env.SIGN_ENABLED === 'true' && {
+    ...process.env.OSX_SIGN_ENABLED === 'true' && {
       osxSign: {
         type: 'distribution',
-        identity: process.env.SIGN_IDENTITY,
+        identity: process.env.OSX_SIGN_IDENTITY,
         optionsForFile: (f: string) => {
           if (f.includes('GBAStudio.app')) {
             return {
@@ -37,7 +37,7 @@ const config: ForgeConfig = {
         },
       },
     },
-    ...process.env.NOTARIZE_ENABLED === 'true' && {
+    ...process.env.OSX_NOTARIZE_ENABLED === 'true' && {
       osxNotarize: {
         appleId: process.env.APPLE_ID!,
         appleIdPassword: process.env.APPLE_ID_PASSWORD!,

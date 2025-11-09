@@ -12,7 +12,7 @@ import type {
   GameScript,
   GameBackground,
 } from '../../types';
-import { sanitizeProject, sanitizeScene, sanitizeScript } from '../sanitize';
+import { sanitize } from '../sanitize';
 import {
   getGraphicsFiles,
   getSceneFiles,
@@ -20,7 +20,7 @@ import {
   getSoundFiles,
   getVariableFiles,
 } from '../files';
-import { unserializeScene } from '../serialize';
+import { unserialize } from '../serialize';
 import Storage from '../storage';
 
 export default async (
@@ -95,7 +95,7 @@ export default async (
 
     current++;
     win?.setProgressBar(current / total);
-    scenes.push(unserializeScene(sanitizeScene(scene)));
+    scenes.push(scene);
   }
 
   // Load graphics
@@ -145,13 +145,12 @@ export default async (
     script._file = file;
     current++;
     win?.setProgressBar(current / total);
-    scripts.push(sanitizeScript(script));
+    scripts.push(script);
   }
 
   // Load project config
-  const project: GameProject = sanitizeProject(
-    JSON.parse(await fs.readFile(projectPath, 'utf-8')),
-    { scenes }
+  const project: GameProject = JSON.parse(
+    await fs.readFile(projectPath, 'utf-8')
   );
   current++;
 
@@ -173,5 +172,5 @@ export default async (
     scripts,
   };
 
-  return payload;
+  return sanitize(unserialize(payload));
 };

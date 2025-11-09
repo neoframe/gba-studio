@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type {
+  AppPayload,
   GameActor,
   GameProject,
   GameScene,
@@ -71,6 +72,11 @@ export const sanitizeScene = (scene: GameScene): GameScene => {
   if (scene.sceneType === '2d-top-down') {
     scene.player = scene.player || { type: 'player', x: 0, y: 0 };
     scene.player.type = 'player';
+
+    if (scene.map?.collisions) {
+      scene.map.width = scene.map.width || scene.map.collisions[0]?.length || 0;
+      scene.map.height = scene.map.height || scene.map.collisions.length || 0;
+    }
   }
 
   return scene;
@@ -110,4 +116,19 @@ export const sanitizeProject = (project: GameProject, opts?: {
   ));
 
   return project;
+};
+
+export const sanitize = (
+  data: Partial<AppPayload>,
+) => {
+  data.scenes = data.scenes?.map(scene => sanitizeScene(scene));
+  data.scripts = data.scripts?.map(script => sanitizeScript(script));
+
+  if (data.project) {
+    data.project = sanitizeProject(data.project, {
+      scenes: data.scenes || [],
+    });
+  }
+
+  return data;
 };

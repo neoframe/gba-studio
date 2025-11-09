@@ -181,6 +181,10 @@ const Scene = ({
       scene.map.collisions = [];
     }
 
+    if (!scene.map.gridSize) {
+      scene.map.gridSize = gridSize;
+    }
+
     const c = scene.map.collisions;
 
     // Ensure correct height
@@ -234,6 +238,14 @@ const Scene = ({
           ? '0'
           : c[y][x];
 
+      if (!scene.map?.width) {
+        scene.map!.width = tileWidth;
+      }
+
+      if (!scene.map?.height) {
+        scene.map!.height = tileHeight;
+      }
+
       onChange?.(scene);
     }
   }, [
@@ -277,6 +289,15 @@ const Scene = ({
       : e.button === 2 // Right button
         ? '0'
         : c[y][x];
+
+    if (!scene.map?.width) {
+      scene.map!.width = tileWidth;
+    }
+
+    if (!scene.map?.height) {
+      scene.map!.height = tileHeight;
+    }
+
     onChange?.(scene);
   }, [
     gridSize, offsetX, offsetY, sceneConfig, tool, zoom, tileHeight, tileWidth,
@@ -333,22 +354,23 @@ const Scene = ({
           onMouseOut={onMouseOut}
           onMouseDown={onMouseDown}
         >
-          { scene.map?.collisions?.map((line, y) => (
-            line.map((cell, x) => (
-              cell === '1' && (
-                <div
-                  key={`${x}-${y}`}
-                  className="absolute bg-red-500/50 pointer-events-none"
-                  style={{
-                    left: x * gridSize,
-                    top: y * gridSize,
-                    width: gridSize,
-                    height: gridSize,
-                  }}
-                />
-              )
-            ))
-          )) }
+          { scene.sceneType === '2d-top-down' && scene.map?.collisions
+            ?.map((line, y) => (
+              line.map((cell, x) => (
+                cell === '1' && (
+                  <div
+                    key={`${x}-${y}`}
+                    className="absolute bg-red-500/50 pointer-events-none"
+                    style={{
+                      left: x * gridSize,
+                      top: y * gridSize,
+                      width: gridSize,
+                      height: gridSize,
+                    }}
+                  />
+                )
+              ))
+            )) }
 
           { sensors.map((sensor, i) => (
             <Sensor
