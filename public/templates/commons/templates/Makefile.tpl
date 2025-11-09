@@ -1,7 +1,7 @@
 TARGET       :=  {{target}}
 BUILD        :=  build
-PYTHON       :=  {{pythonPath}}
-LIBBUTANOABS :=  {{butanoPath}}
+PYTHON       :=  {{posix pythonPath}}
+LIBBUTANOABS :=  {{posix butanoPath}}
 SOURCES      :=  {{#each sources}}{{posix this}} {{/each}}
 INCLUDES     :=  {{#each includes}}{{posix this}} {{/each}}
 DATA         :=  {{#each data}}{{posix this}} {{/each}}
