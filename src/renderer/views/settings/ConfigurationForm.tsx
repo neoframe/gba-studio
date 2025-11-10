@@ -36,17 +36,6 @@ const ConfigurationForm = ({
         <Heading size="3">Build settings</Heading>
         <Card className="!flex flex-col gap-4">
           <div className="flex flex-col items-start gap-2">
-            <Text>Git executable path</Text>
-            <TextField.Root
-              size="3"
-              value={settings?.gitPath || ''}
-              onChange={onTextChange.bind(null, 'settings.gitPath')}
-              placeholder="/usr/bin/git"
-              className="w-96"
-              onBlur={onFieldBlur}
-            />
-          </div>
-          <div className="flex flex-col items-start gap-2">
             <Text>Python executable path</Text>
             <TextField.Root
               size="3"

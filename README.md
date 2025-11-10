@@ -1,14 +1,17 @@
 # gba-studio
 
-GB Studio, but for the GBA
+GB Studio, but worse & for the GBA
 
 ## Roadmap
 
 - [ ] Copy/paste events
+- [ ] WASM mGBA integration
 - [ ] Rename events
+- [ ] Move target point from the target scene
 - [ ] Foreground sprites
 - [ ] File changes detection outside of GBA Studio
-- [ ] PNG auto convert on build
-- [ ] Move target point from the target scene
+- [ ] images auto convert on build
 - [ ] Sprite animations editor
 - [ ] Sound editor
+- [ ] Plugins
+- [ ] Portable python & devkitARM
