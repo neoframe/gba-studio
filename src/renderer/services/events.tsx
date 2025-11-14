@@ -8,6 +8,7 @@ import {
   LapTimerIcon,
   LayersIcon,
   MixIcon,
+  MoveIcon,
   Pencil1Icon,
   PlayIcon,
   ShadowIcon,
@@ -60,6 +61,17 @@ export const AVAILABLE_EVENTS: ListCategory<EventDefinition>[] = [{
     value: 'fade-out',
     keywords: ['camera', 'fade', 'out'],
     construct: () => ({ type: 'fade-out', duration: 200 }),
+  }, {
+    icon: MoveIcon,
+    name: 'Move Camera To',
+    value: 'move-camera-to',
+    keywords: ['camera', 'move', 'pan', 'to'],
+    construct: () => ({
+      type: 'move-camera-to',
+      x: 0,
+      y: 0,
+      duration: 200,
+    }),
   }],
 }, {
   name: 'Scene',

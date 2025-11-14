@@ -26,18 +26,24 @@ export const unserializeScene = (scene: GameScene): GameScene => {
   return scene;
 };
 
-export const serialize = (
+export const serialize = async (
   payload: Partial<AppPayload>
-): Partial<AppPayload> => {
-  payload.scenes = payload.scenes?.map(scene => serializeScene(scene));
+): Promise<Partial<AppPayload>> => {
+  if (payload.scenes) {
+    payload.scenes = await Promise
+      .all(payload.scenes.map(scene => serializeScene(scene)));
+  }
 
   return payload;
 };
 
-export const unserialize = (
-  payload: Partial<AppPayload>
-): Partial<AppPayload> => {
-  payload.scenes = payload.scenes?.map(scene => unserializeScene(scene));
+export const unserialize = async (
+  payload: Partial<AppPayload>,
+): Promise<Partial<AppPayload>> => {
+  if (payload.scenes) {
+    payload.scenes = await Promise
+      .all(payload.scenes.map(scene => unserializeScene(scene)));
+  }
 
   return payload;
 };

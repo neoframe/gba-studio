@@ -208,6 +208,29 @@ namespace neo::types
       event(type_), name(name_) {}
   };
 
+  struct move_camera_to_event: event
+  {
+    int x;
+    int y;
+    int duration;
+    bool allow_diagonal;
+    bn::string_view direction_priority;
+    move_camera_to_event(
+      bn::string_view type_,
+      int x_,
+      int y_,
+      int duration_,
+      bool allow_diagonal_,
+      bn::string_view direction_priority_
+    ):
+      event(type_),
+      x(x_),
+      y(y_),
+      duration(duration_),
+      allow_diagonal(allow_diagonal_),
+      direction_priority(direction_priority_) {}
+  };
+
   struct sensor
   {
     bn::string_view _id;

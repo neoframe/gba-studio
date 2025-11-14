@@ -14,8 +14,10 @@ import type {
   SubToolType,
   ToolType,
 } from '../../types';
+import type EventEmitter from './emitter';
 
 export interface AppContextType extends Omit<AppPayload, 'project'> {
+  eventEmitter?: EventEmitter;
   project?: GameProject;
   projectPath: string;
   projectBase: string;

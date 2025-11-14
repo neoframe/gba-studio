@@ -1,4 +1,7 @@
 import { randomUUID } from 'node:crypto';
+import path from 'node:path';
+
+import { imageSizeFromFile } from 'image-size/fromFile';
 
 import type {
   AppPayload,
@@ -11,8 +14,9 @@ import type {
   OnButtonPressEvent,
   SceneEvent,
 } from '../types';
+import { getResourcesDir } from './utils';
 
-export const sanitizeEvent = (event: SceneEvent): SceneEvent => {
+export const sanitizeEvent = async (event: SceneEvent): Promise<SceneEvent> => {
   if (!event.id) {
     event.id = randomUUID();
   }
@@ -20,53 +24,116 @@ export const sanitizeEvent = (event: SceneEvent): SceneEvent => {
   if (event.type === 'if') {
     const evt = event as IfEvent;
 
-    evt.then?.forEach(e => sanitizeEvent(e));
-    evt.else?.forEach(e => sanitizeEvent(e));
+    for (const e of evt.then ?? []) {
+      await sanitizeEvent(e);
+    }
+
+    for (const e of evt.else ?? []) {
+      await sanitizeEvent(e);
+    }
   }
 
   if (event.type === 'on-button-press') {
     const evt = event as OnButtonPressEvent;
 
-    evt.events?.forEach(e => sanitizeEvent(e));
+    for (const e of evt.events ?? []) {
+      await sanitizeEvent(e);
+    }
   }
 
   return event;
 };
 
-export const sanitizeActor = (actor: GameActor): GameActor => {
+export const sanitizeActor = async (actor: GameActor): Promise<GameActor> => {
   if (!actor.id) {
     actor.id = randomUUID();
   }
 
   actor.width = Number(actor.width ?? 1);
   actor.height = Number(actor.height ?? 1);
-  actor.events?.init?.forEach(event => sanitizeEvent(event));
-  actor.events?.interact?.forEach(event => sanitizeEvent(event));
-  actor.events?.update?.forEach(event => sanitizeEvent(event));
+
+  for (const event of actor.events?.init ?? []) {
+    await sanitizeEvent(event);
+  }
+
+  for (const event of actor.events?.interact ?? []) {
+    await sanitizeEvent(event);
+  }
+
+  for (const event of actor.events?.update ?? []) {
+    await sanitizeEvent(event);
+  }
 
   return actor;
 };
 
-export const sanitizeSensor = (sensor: GameSensor): GameSensor => {
+export const sanitizeSensor = async (
+  sensor: GameSensor
+): Promise<GameSensor> => {
   if (!sensor.id) {
     sensor.id = randomUUID();
   }
 
   sensor.width = Number(sensor.width ?? 1);
   sensor.height = Number(sensor.height ?? 1);
-  sensor.events?.forEach(event => sanitizeEvent(event));
+
+  for (const event of sensor.events ?? []) {
+    await sanitizeEvent(event);
+  }
 
   return sensor;
 };
 
-export const sanitizeScene = (scene: GameScene): GameScene => {
+export const sanitizeScene = async (
+  scene: GameScene,
+  opts?: SanitizeOptions
+): Promise<GameScene> => {
   if (!scene.id) {
     scene.id = randomUUID();
   }
 
-  scene.events?.forEach(event => sanitizeEvent(event));
-  scene.actors?.forEach(actor => sanitizeActor(actor));
-  scene.map?.sensors?.forEach(sensor => sanitizeSensor(sensor));
+  for (const event of scene.events ?? []) {
+    await sanitizeEvent(event);
+  }
+
+  for (const actor of scene.actors ?? []) {
+    await sanitizeActor(actor);
+  }
+
+  if (!scene.map) {
+    scene.map = { type: 'map', width: 0, height: 0, gridSize: 16 };
+  }
+
+  // If width/height not set, try to get it from background image
+  if (!scene.map.width || !scene.map.height) {
+    try {
+      const size = await imageSizeFromFile(
+        !scene.background || scene.background === 'bg_default'
+          ? path.join(getResourcesDir(), 'bg_default.bmp')
+          : path.join(
+            path.dirname(opts?.projectPath || ''),
+            'graphics',
+            `${scene.background}.bmp`
+          )
+      );
+
+      if (!scene.map.width) {
+        scene.map.width = size.width;
+      }
+
+      if (!scene.map.height) {
+        scene.map.height = size.height;
+      }
+    } catch {}
+  }
+
+  if (!scene.map.gridSize) {
+    scene.map.gridSize = 16;
+  }
+
+  for (const sensor of scene.map?.sensors ?? []) {
+    await sanitizeSensor(sensor);
+  }
 
   // Ensure player exists for 2d-top-down scenes & has type "player"
   if (scene.sceneType === '2d-top-down') {
@@ -82,19 +149,23 @@ export const sanitizeScene = (scene: GameScene): GameScene => {
   return scene;
 };
 
-export const sanitizeScript = (script: GameScript): GameScript => {
+export const sanitizeScript = async (
+  script: GameScript
+): Promise<GameScript> => {
   if (!script.id) {
     script.id = randomUUID();
   }
 
-  script.events?.forEach(event => sanitizeEvent(event));
+  for (const event of script.events ?? []) {
+    await sanitizeEvent(event);
+  }
 
   return script;
 };
 
-export const sanitizeProject = (project: GameProject, opts?: {
+export const sanitizeProject = async (project: GameProject, opts?: {
   scenes: GameScene[];
-}): GameProject => {
+}): Promise<GameProject> => {
   if (!project.scenes) {
     project.scenes = [];
   }
@@ -118,14 +189,30 @@ export const sanitizeProject = (project: GameProject, opts?: {
   return project;
 };
 
-export const sanitize = (
+export interface SanitizeOptions {
+  projectPath?: string;
+}
+
+export const sanitize = async (
   data: Partial<AppPayload>,
-) => {
-  data.scenes = data.scenes?.map(scene => sanitizeScene(scene));
-  data.scripts = data.scripts?.map(script => sanitizeScript(script));
+  opts?: SanitizeOptions,
+): Promise<Partial<AppPayload>> => {
+  if (!data.scenes) {
+    data.scenes = [];
+  }
+
+  data.scenes = await Promise
+    .all(data.scenes.map(scene => sanitizeScene(scene, opts)));
+
+  if (!data.scripts) {
+    data.scripts = [];
+  }
+
+  data.scripts = await Promise
+    .all(data.scripts?.map(script => sanitizeScript(script)));
 
   if (data.project) {
-    data.project = sanitizeProject(data.project, {
+    data.project = await sanitizeProject(data.project, {
       scenes: data.scenes || [],
     });
   }

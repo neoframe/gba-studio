@@ -6,6 +6,7 @@ GB Studio, but worse & for the GBA
 
 - [x] File changes detection outside of GBA Studio
 - [x] Copy/paste events
+- [ ] Use variables for any value
 - [ ] Rename events
 - [ ] Windows signed installer
 - [ ] WASM mGBA integration

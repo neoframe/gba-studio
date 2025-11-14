@@ -281,6 +281,15 @@ export interface EnableActorEvent extends SceneEvent {
   actor: string;
 }
 
+export interface MoveCameraToEvent extends SceneEvent {
+  type: 'move-camera-to';
+  x: EventValue;
+  y: EventValue;
+  duration?: EventValue;
+  allowDiagonal?: boolean;
+  directionPriority?: 'horizontal' | 'vertical';
+}
+
 export interface IfEventCondition {
   type: 'condition';
   left: EventValue | IfEventCondition;

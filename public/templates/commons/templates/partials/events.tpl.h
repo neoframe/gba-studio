@@ -112,6 +112,15 @@ neo::types::stop_music_event {{../prefix}}_{{@index}}("stop-music");
 neo::types::play_sound_event {{../prefix}}_{{@index}}("play-sound", "{{this.name}}", {{this.volume}}, {{this.speed}}, {{this.panning}}, {{this.priority}});
 {{else if (eq this.type "execute-script")}}
 neo::types::execute_script_event {{../prefix}}_{{@index}}("execute-script", "{{this.script}}");
+{{else if (eq this.type "move-camera-to")}}
+neo::types::move_camera_to_event {{../prefix}}_{{@index}}(
+  "move-camera-to",
+  {{valuedef this.x 0}},
+  {{valuedef this.y 0}},
+  {{valuedef this.duration 200}},
+  {{valuedef this.allowDiagonal true}},
+  "{{valuedef this.directionPriority "horizontal"}}"
+);
 {{else}}
 neo::types::event {{../prefix}}_{{@index}}("{{this.type}}");
 {{/if}}

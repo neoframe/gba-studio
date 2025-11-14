@@ -24,7 +24,7 @@ import type {
   GameSensor,
 } from '../../../types';
 import { useApp, useCanvas, useEditor } from '../../services/hooks';
-import { getImageSize, loadImage, pixelToTile } from '../../../helpers';
+import { getImageSize, loadImage, pixelToTile, tileToPixel } from '../../../helpers';
 import Actor from './Actor';
 import Sensor from './Sensor';
 import PlayerStart from './PlayerStart';
@@ -45,6 +45,8 @@ export interface SceneProps
 export interface SceneState {
   size: [number, number];
   isMouseDown: boolean;
+  cameraEnabled: boolean;
+  cameraPosition: [number, number];
 }
 
 const Scene = ({
@@ -59,13 +61,37 @@ const Scene = ({
 }: SceneProps) => {
   const backgroundRef = useRef<HTMLCanvasElement>(null);
   const { zoom, mouseX, offsetX, mouseY, offsetY } = useInfiniteCanvas();
-  const { project, resourcesPath, backgrounds } = useApp();
+  const { eventEmitter, project, resourcesPath, backgrounds } = useApp();
   const { selectedScene, selectedItem, tool } = useCanvas();
   const { setTilePosition } = useEditor();
   const [state, dispatch] = useReducer(mockState<SceneState>, {
     size: [240, 160],
     isMouseDown: false,
+    cameraEnabled: false,
+    cameraPosition: [0, 0],
   });
+
+  useEventListener('scene:camera:set', (e: CustomEvent) => {
+    if (!scene.id || e.detail.sceneId !== scene.id) {
+      return;
+    }
+
+    dispatch({
+      cameraEnabled: true,
+      cameraPosition: [e.detail.x, e.detail.y],
+    });
+  }, [scene], { target: eventEmitter });
+
+  useEventListener('scene:camera:reset', (e: CustomEvent) => {
+    if (!scene.id || e.detail.sceneId !== scene.id || !state.cameraEnabled) {
+      return;
+    }
+
+    dispatch({
+      cameraEnabled: false,
+      cameraPosition: [0, 0],
+    });
+  }, [scene, state.cameraEnabled], { target: eventEmitter });
 
   const sceneConfig = useMemo(() => (
     preview
@@ -367,7 +393,7 @@ const Scene = ({
         <Card
           className={classNames(
             '!relative bg-cover bg-center transition-[outline-width]',
-            'duration-200',
+            'duration-200 overflow-hidden',
             { '!outline-4 !outline-(--accent-9)': selectedScene === scene },
             className
           )}
@@ -388,6 +414,21 @@ const Scene = ({
               'pixelated',
             )}
           />
+
+          { state.cameraEnabled && (
+            <div
+              className={classNames(
+                'absolute z-100 w-[240px] h-[160px] border-2',
+                'border-yellow-500 pointer-events-none',
+              )}
+              style={{
+                left: tileToPixel(state.cameraPosition[0], gridSize),
+                top: tileToPixel(state.cameraPosition[1], gridSize),
+                boxShadow: '0 0 0 10000px rgba(0, 0, 0, 0.25)',
+              }}
+            />
+          )}
+
           { scene.sceneType === '2d-top-down' && scene.map?.collisions
             ?.map((line, y) => (
               line.map((cell, x) => (

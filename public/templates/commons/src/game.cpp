@@ -5,9 +5,10 @@
 #include <bn_camera_actions.h>
 #include <bn_log.h>
 #include <bn_keypad.h>
-#include "bn_audio.h"
-#include "bn_music.h"
-#include "bn_sound.h"
+#include <bn_audio.h>
+#include <bn_music.h>
+#include <bn_sound.h>
+
 #include "bn_music_items_info.h"
 #include "bn_sound_items_info.h"
 
@@ -23,6 +24,7 @@
 #include "buttons.h"
 #include "actor.h"
 #include "dialog.h"
+#include "camera.h"
 
 namespace neo
 {
@@ -460,6 +462,22 @@ namespace neo
           exec_event(ev, is_loop);
         }
       }
+    }
+
+    else if (e->type == "move-camera-to")
+    {
+      const neo::types::move_camera_to_event* move_camera_evt =
+        static_cast<const neo::types::move_camera_to_event*>(e);
+
+      neo::camera::move_to(
+        camera,
+        *active_scene,
+        move_camera_evt->x,
+        move_camera_evt->y,
+        move_camera_evt->duration,
+        move_camera_evt->allow_diagonal,
+        move_camera_evt->direction_priority
+      );
     }
 
     /**

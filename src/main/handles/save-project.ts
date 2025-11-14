@@ -14,7 +14,7 @@ export default async (
   data: Partial<AppPayload>
 ) => {
   const projectDir = path.dirname(projectPath);
-  data = serialize(sanitize(data));
+  data = await serialize(await sanitize(data, { projectPath }));
 
   // Save variables
   for (const variableSet of data.variables || []) {

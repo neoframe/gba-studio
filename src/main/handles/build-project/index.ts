@@ -251,7 +251,7 @@ async function startBuild (
   }
 }
 
-export function startBuildProject (
+export async function startBuildProject (
   storage: Storage,
   event: IpcMainInvokeEvent,
   projectPath: string,
@@ -264,7 +264,7 @@ export function startBuildProject (
     id: buildId,
     projectPath,
     controller,
-    data: serialize(sanitize(data)),
+    data: await serialize(await sanitize(data, { projectPath })),
   };
 
   builds.set(buildId, build);

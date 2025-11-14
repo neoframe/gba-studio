@@ -1,5 +1,11 @@
 import type { IpcRendererEvent } from 'electron';
-import { DependencyList, useContext, useDeferredValue, useEffect, useState } from 'react';
+import {
+  type DependencyList,
+  useContext,
+  useDeferredValue,
+  useEffect,
+  useState,
+} from 'react';
 import { useTimeout } from '@junipero/react';
 
 import {

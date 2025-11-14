@@ -172,5 +172,5 @@ export default async (
     scripts,
   };
 
-  return sanitize(unserialize(payload));
+  return await sanitize(await unserialize(payload), { projectPath });
 };

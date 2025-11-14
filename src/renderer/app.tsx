@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useReducer } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { Theme } from '@radix-ui/themes';
 import { type MoveableState, cloneDeep, mockState } from '@junipero/react';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -15,6 +15,7 @@ import {
   useDelayedCallback,
   useQuery,
 } from './services/hooks';
+import EventEmitter from './services/emitter';
 import ProjectSelection from './windows/project-selection';
 import Editor from './windows/editor';
 
@@ -33,6 +34,7 @@ export interface AppState extends Omit<AppPayload, 'project'> {
 }
 
 const App = () => {
+  const eventsRef = useRef<EventEmitter>(new EventEmitter());
   const { projectPath, resourcesPath, projectBase, theme } = useQuery();
   const [state, dispatch] = useReducer(mockState<AppState>, {
     theme,
@@ -256,6 +258,7 @@ const App = () => {
   }, []);
 
   const getContext = useCallback((): AppContextType => ({
+    eventEmitter: eventsRef.current,
     project: state.project,
     scenes: state.scenes,
     dirty: state.dirty,
