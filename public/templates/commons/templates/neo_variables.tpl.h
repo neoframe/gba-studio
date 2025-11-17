@@ -11,13 +11,13 @@ namespace neo::variables
 {
   struct registry
   {
-    bn::unordered_map<bn::string_view, bn::string_view, {{or variables.length 1}}> all;
+    bn::unordered_map<bn::string_view, bn::string_view, {{valuesCount variables}}> all;
 
-    inline void init ()
+    registry(): all()
     {
       {{#each variables}}
       {{#each (entries this.values) }}
-      all.insert("{{this.[0]}}", "{{this.[1]}}");
+      all.insert_or_assign("{{this.[0]}}", "{{this.[1]}}");
       {{/each}}
       {{/each}}
     }

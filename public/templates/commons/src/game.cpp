@@ -34,6 +34,7 @@ namespace neo
   ) :
     camera(camera_),
     player(player_),
+    variables(),
     active_scene(nullptr),
     scene_bg(nullptr)
   {
@@ -42,8 +43,6 @@ namespace neo
 
     scripted_events_count = 0;
     scripted_events.clear();
-
-    variables.init();
   }
 
   void game::set_scene(bn::string_view scene_name)

@@ -26,6 +26,8 @@ export const setupHandlebars = async () => {
   Handlebars.registerHelper('entries', obj => Object.entries(obj));
   Handlebars.registerHelper('concat', (...args) => args.slice(0, -1).join(''));
   Handlebars.registerHelper('uppercase', (str: string) => str.toUpperCase());
+  Handlebars.registerHelper('valuesCount', (arr: any[]) =>
+    arr.reduce((c, i) => c + Object.keys(i.values).length, 0));
   Handlebars.registerHelper('posix', (p: string) =>
     p.replace(/\s/g, '\\ ').replace(/\\/g, '/'));
   Handlebars.registerHelper('isRawValue', (obj: any) =>
