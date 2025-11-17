@@ -28,6 +28,7 @@ import {
   getResourcesPath,
   registerClipboard,
   getClipboard,
+  cleanBuildFolder,
 } from './handles';
 import Storage from './storage';
 
@@ -76,3 +77,4 @@ ipcMain.handle('set-editor-config', setEditorConfig.bind(null, storage));
 ipcMain.handle('get-resources-path', getResourcesPath);
 ipcMain.handle('register-clipboard', registerClipboard.bind(null, storage));
 ipcMain.handle('get-clipboard', getClipboard.bind(null, storage));
+ipcMain.handle('clean-build-folder', cleanBuildFolder);

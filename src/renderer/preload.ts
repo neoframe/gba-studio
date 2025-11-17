@@ -3,6 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron/renderer';
 import type {
   AppPayload,
   AppStorage,
+  BuildOptions,
   ProjectTemplate,
   RecentProject,
 } from '../types';
@@ -48,11 +49,14 @@ contextBridge.exposeInMainWorld('electron', {
     ipcRenderer.invoke('is-fullscreen'),
   startBuildProject: (
     projectPath: string,
-    data?: Partial<AppPayload>
+    data?: Partial<AppPayload>,
+    opts?: BuildOptions
   ): Promise<string> =>
-    ipcRenderer.invoke('start-build-project', projectPath, data),
+    ipcRenderer.invoke('start-build-project', projectPath, data, opts),
   abortBuildProject: (buildId?: string): Promise<void> =>
     ipcRenderer.invoke('abort-build-project', buildId),
+  cleanBuildFolder: (projectPath?: string): Promise<void> =>
+    ipcRenderer.invoke('clean-build-folder', projectPath),
   getRomPath: (projectPath: string): Promise<string> =>
     ipcRenderer.invoke('get-rom-path', projectPath),
   getEditorConfig: (): Promise<AppStorage> =>

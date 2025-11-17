@@ -6,7 +6,7 @@ import fs from 'node:fs/promises';
 import type { IpcMainInvokeEvent } from 'electron';
 import fse from 'fs-extra';
 
-import type { AppPayload, Build } from '../../../types';
+import type { AppPayload, Build, BuildOptions } from '../../../types';
 import { getResourcesDir } from '../../utils';
 import {
   getBuildDir,
@@ -55,7 +55,7 @@ async function checkPython (
   event: IpcMainInvokeEvent,
   build: Build,
 ) {
-  if (build.controller.signal.aborted) {
+  if (build.controller?.signal.aborted) {
     return;
   }
 
@@ -77,7 +77,7 @@ async function checkDependencies (
   event: IpcMainInvokeEvent,
   build: Build,
 ) {
-  if (build.controller.signal.aborted) {
+  if (build.controller?.signal.aborted) {
     return;
   }
 
@@ -163,8 +163,14 @@ async function buildProject (
   event: IpcMainInvokeEvent,
   build: Build,
 ) {
-  if (build.controller.signal.aborted) {
+  if (build.controller?.signal.aborted) {
     return;
+  }
+
+  if (build.opts?.clean === true) {
+    sendStep(event, build.id, 'Cleaning build folder...');
+    await fse.remove(getBuildDir(build));
+    sendSuccessLog(event, build.id, 'Build folder cleaned.');
   }
 
   sendStep(event, build.id, 'Pre-building templates...');
@@ -206,7 +212,7 @@ async function buildProject (
   } catch (e) {
     sendError(event, build.id, `Built .gba file not found: ${finalGamePath}`);
     sendError(event, build.id, (e as Error).message);
-    build.controller.abort();
+    build.controller?.abort();
     sendAbort(event, build.id);
   }
 
@@ -235,7 +241,7 @@ async function startBuild (
   try {
     await checkDependencies(storage, event, build);
 
-    if (build.controller.signal.aborted) {
+    if (build.controller?.signal.aborted) {
       return;
     }
 
@@ -243,7 +249,7 @@ async function startBuild (
 
     event.sender.send('build-completed', build.id);
   } catch (e) {
-    if (build.controller.signal.aborted) {
+    if (build.controller?.signal.aborted) {
       sendAbort(event, build.id);
     } else {
       sendError(event, build.id, (e as Error).message);
@@ -256,6 +262,7 @@ export async function startBuildProject (
   event: IpcMainInvokeEvent,
   projectPath: string,
   data: Partial<AppPayload>,
+  opts?: BuildOptions,
 ) {
   const buildId = randomUUID();
   latestBuildId = buildId;
@@ -265,6 +272,7 @@ export async function startBuildProject (
     projectPath,
     controller,
     data: await serialize(await sanitize(data, { projectPath })),
+    opts,
   };
 
   builds.set(buildId, build);
@@ -286,3 +294,18 @@ export function abortBuildProject (
 
   event.sender.send('build-aborted', { id: buildId });
 }
+
+export async function cleanBuildFolder (
+  event: IpcMainInvokeEvent,
+  projectPath: string,
+) {
+  const build: Build = {
+    id: randomUUID(),
+    projectPath,
+  };
+
+  sendStep(event, build.id, 'Cleaning build folder...');
+  await fse.remove(getBuildDir(build));
+  sendSuccessLog(event, build.id, 'Build folder cleaned.');
+}
+

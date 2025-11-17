@@ -317,11 +317,16 @@ export type FramesDefinition = {
   };
 };
 
+export interface BuildOptions {
+  clean?: boolean;
+}
+
 export interface Build {
   id: string;
   projectPath: string;
-  controller: AbortController;
+  controller?: AbortController;
   data?: Partial<AppPayload>;
+  opts?: BuildOptions;
 }
 
 export interface BuildMessage {

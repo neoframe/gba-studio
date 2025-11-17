@@ -75,6 +75,43 @@ export const createMenus = () => {
       ],
     },
     {
+      label: 'Build',
+      submenu: [
+        {
+          label: 'Build Project',
+          accelerator: 'CmdOrCtrl+Enter',
+          click: async () => {
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+
+            if (focusedWindow) {
+              focusedWindow.webContents.send('build-project');
+            }
+          },
+        },
+        {
+          label: 'Clean Build Folder',
+          click: async () => {
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+
+            if (focusedWindow) {
+              focusedWindow.webContents.send('clean-build-folder');
+            }
+          },
+        },
+        {
+          label: 'Clean And Rebuild Project',
+          accelerator: 'CmdOrCtrl+Shift+Enter',
+          click: async () => {
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+
+            if (focusedWindow) {
+              focusedWindow.webContents.send('rebuild-project');
+            }
+          },
+        },
+      ],
+    },
+    {
       label: 'View',
       submenu: [
         ...isDev ? [

@@ -89,7 +89,7 @@ export function runCommand (
       reject(err);
     });
 
-    opts?.build?.controller.signal.addEventListener('abort', () => {
+    opts?.build?.controller?.signal.addEventListener('abort', () => {
       process.kill();
       reject(new Error(`${command} process aborted`));
     });

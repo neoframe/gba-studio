@@ -23,7 +23,12 @@ import {
 import { type ResizableProps, Resizable } from 're-resizable';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import { useApp, useCanvas, useEditor } from '../../services/hooks';
+import {
+  useApp,
+  useBridgeListener,
+  useCanvas,
+  useEditor,
+} from '../../services/hooks';
 import views from '../../views';
 
 export interface LeftSidebarProps extends ResizableProps {}
@@ -69,7 +74,7 @@ const LeftSidebar = ({
     checkFullscreen();
   }, [checkFullscreen]);
 
-  const onToggleBuild = useCallback(async () => {
+  const onToggleBuild = useCallback(async (clean?: boolean) => {
     if (building) {
       await window.electron.abortBuildProject();
 
@@ -87,13 +92,39 @@ const LeftSidebar = ({
       scenes,
       variables,
       scripts,
-    });
+    }, { clean });
   }, [
     building, selectedScene, projectPath, project, scenes, variables, scripts,
     setBuilding,
   ]);
 
-  useHotkeys('mod+enter', onToggleBuild, [onToggleBuild]);
+  useHotkeys('mod+enter', () => {
+    onToggleBuild();
+  }, [onToggleBuild]);
+
+  useBridgeListener('build-project', () => {
+    onToggleBuild();
+  }, [onToggleBuild]);
+
+  useBridgeListener('rebuild-project', () => {
+    onToggleBuild(true);
+  }, [onToggleBuild]);
+
+  const onCleanBuildFolder = useCallback(async () => {
+    if (building) {
+      await window.electron.abortBuildProject();
+
+      return;
+    }
+
+    setBuilding(true);
+    await window.electron.cleanBuildFolder(projectPath);
+    setBuilding(false);
+  }, [setBuilding, building, projectPath]);
+
+  useBridgeListener('clean-build-folder', () => {
+    onCleanBuildFolder();
+  }, [onCleanBuildFolder]);
 
   const onTabChange = useCallback((newView: string) => {
     setView(newView);
@@ -172,7 +203,11 @@ const LeftSidebar = ({
               </span>
             )}
           >
-            <IconButton variant="ghost" radius="full" onClick={onToggleBuild}>
+            <IconButton
+              variant="ghost"
+              radius="full"
+              onClick={onToggleBuild.bind(null, false)}
+            >
               { building ? (
                 <StopIcon
                   width={20}
