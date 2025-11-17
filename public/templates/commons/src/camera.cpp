@@ -32,6 +32,12 @@ namespace neo::camera
     int end_x = bn::min(bn::max(target_x, min_x), max_x);
     int end_y = bn::min(bn::max(target_y, min_y), max_y);
 
+    if (duration <= 0)
+    {
+      camera.set_position(end_x, end_y);
+      return;
+    }
+
     int delta_x = end_x - start_x;
     int delta_y = end_y - start_y;
 
