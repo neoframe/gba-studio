@@ -84,20 +84,20 @@ namespace neo
     {
       BN_LOG("Has player");
 
-      int x = active_scene->start_position[0];
-      int y = active_scene->start_position[1];
+      int x = active_scene->start_x;
+      int y = active_scene->start_y;
       neo::types::direction dir = active_scene->start_direction;
 
       if (
         last_goto_event != nullptr &&
         active_scene->is(last_goto_event->target) &&
-        last_goto_event->start_position[0] != -1 &&
-        last_goto_event->start_position[1] != -1
+        last_goto_event->start_x->as_int(variables) != -1 &&
+        last_goto_event->start_y->as_int(variables) != -1
       )
       {
         BN_LOG("Using last go-to-scene event position");
-        x = last_goto_event->start_position[0];
-        y = last_goto_event->start_position[1];
+        x = last_goto_event->start_x->as_int(variables);
+        y = last_goto_event->start_y->as_int(variables);
         dir = last_goto_event->start_direction;
         last_goto_event = nullptr;
       }
@@ -177,7 +177,7 @@ namespace neo
     {
       const neo::types::wait_event* wait_evt =
         static_cast<const neo::types::wait_event*>(e);
-      neo::utils::wait(wait_evt->duration);
+      neo::utils::wait(wait_evt->duration->as_int(variables));
     }
 
     /**
@@ -190,7 +190,7 @@ namespace neo
         static_cast<const neo::types::fade_event*>(e);
 
       enable_blending();
-      neo::fade::enter(*scene_bg, fade_evt->duration);
+      neo::fade::enter(*scene_bg, fade_evt->duration->as_int(variables));
       disable_blending();
     }
 
@@ -204,7 +204,7 @@ namespace neo
         static_cast<const neo::types::fade_event*>(e);
 
       enable_blending();
-      neo::fade::exit(*scene_bg, fade_evt->duration);
+      neo::fade::exit(*scene_bg, fade_evt->duration->as_int(variables));
     }
 
     /**
@@ -471,9 +471,9 @@ namespace neo
       neo::camera::move_to(
         camera,
         *active_scene,
-        move_camera_evt->x,
-        move_camera_evt->y,
-        move_camera_evt->duration,
+        move_camera_evt->x->as_int(variables),
+        move_camera_evt->y->as_int(variables),
+        move_camera_evt->duration->as_int(variables),
         move_camera_evt->allow_diagonal,
         move_camera_evt->direction_priority
       );
@@ -507,12 +507,17 @@ namespace neo
     if (expression->type == "variable")
     {
       auto* var_expr = static_cast<neo::types::if_expression_variable*>(expression);
-      auto it = variables.all.find(var_expr->name);
 
-      if (it != variables.all.end())
+      if (!variables.has(var_expr->name))
       {
-        return it->second;
+        BN_LOG("Variable not found: ", var_expr->name);
+        return "";
       }
+
+      // if comparison does not care about the type, always compares strings
+      // TODO: allow gt/lt/... comparisons
+      auto var_value = variables.get(var_expr->name);
+      return var_value.as_string();
     }
     else if (expression->type == "value")
     {

@@ -14,6 +14,9 @@ export const setupHandlebars = async () => {
   Handlebars.registerHelper('hasItems', (arr: any[]) =>
     Array.isArray(arr) && arr.length > 0);
   Handlebars.registerHelper('slug', (str: string) => toSlug(str));
+  Handlebars.registerHelper('int', (v: any) => parseInt(v, 10) || 0);
+  Handlebars.registerHelper('bool', (v: any) =>
+    typeof v === 'string' ? v === 'true' : !!v);
   Handlebars.registerHelper('eq', (a, b) => a === b);
   Handlebars.registerHelper('gt', (a, b) => a > b);
   Handlebars.registerHelper('lt', (a, b) => a < b);
@@ -60,6 +63,14 @@ export const setupHandlebars = async () => {
     (await fse.readFile(path.join(
       getResourcesDir(),
       './public/templates/commons/templates/partials/if-expressions.tpl.h'
+    ), 'utf-8')).trim()
+  );
+
+  Handlebars.registerPartial(
+    'valuePartial',
+    (await fse.readFile(path.join(
+      getResourcesDir(),
+      './public/templates/commons/templates/partials/value.tpl.h'
     ), 'utf-8')).trim()
   );
 };

@@ -1,10 +1,13 @@
 {{#each events}}
 {{#if (eq this.type "wait")}}
-neo::types::wait_event {{../prefix}}_{{@index}}("wait", {{this.duration}});
+{{>valuePartial prefix=(concat ../prefix "_" @index "_duration") value=this.duration}}
+neo::types::wait_event {{../prefix}}_{{@index}}("wait", &{{../prefix}}_{{@index}}_duration_value);
 {{else if (eq this.type "fade-in")}}
-neo::types::fade_event {{../prefix}}_{{@index}}("fade-in", {{this.duration}});
+{{>valuePartial prefix=(concat ../prefix "_" @index "_duration") value=this.duration}}
+neo::types::fade_event {{../prefix}}_{{@index}}("fade-in", &{{../prefix}}_{{@index}}_duration_value);
 {{else if (eq this.type "fade-out")}}
-neo::types::fade_event {{../prefix}}_{{@index}}("fade-out", {{this.duration}});
+{{>valuePartial prefix=(concat ../prefix "_" @index "_duration") value=this.duration}}
+neo::types::fade_event {{../prefix}}_{{@index}}("fade-out", &{{../prefix}}_{{@index}}_duration_value);
 {{else if (or (eq this.type "wait-for-button") (eq this.type "on-button-press"))}}
 {{#if (eq this.type "on-button-press")}}
 {{#if this.events}}
@@ -33,11 +36,13 @@ neo::types::button_event {{../prefix}}_{{@index}}(
   {{/if}}
 );
 {{else if (eq this.type "go-to-scene")}}
-int {{../prefix}}_{{@index}}_start_pos[2] = { {{valuedef this.start.x -1}}, {{valuedef this.start.y -1}} };
+{{>valuePartial prefix=(concat ../prefix "_" @index "_start_x") value=(valuedef this.start.x -1)}}
+{{>valuePartial prefix=(concat ../prefix "_" @index "_start_y") value=(valuedef this.start.y -1)}}
 neo::types::scene_event {{../prefix}}_{{@index}}(
   "go-to-scene",
   "{{this.target}}",
-  {{../prefix}}_{{@index}}_start_pos,
+  &{{../prefix}}_{{@index}}_start_x_value,
+  &{{../prefix}}_{{@index}}_start_y_value,
   neo::types::direction::{{uppercase (valuedef this.start.direction 'down')}}
 );
 {{else if (eq this.type "show-dialog")}}
@@ -46,10 +51,15 @@ neo::types::dialog_event {{../prefix}}_{{@index}}(
   "{{preserveLineBreaks this.text}}"
 );
 {{else if (eq this.type "set-variable")}}
+neo::variables::value {{../prefix}}_{{@index}}_value(
+  {{int this.value}},
+  {{bool this.value}},
+  "{{this.value}}"
+);
 neo::types::set_variable_event {{../prefix}}_{{@index}}(
   "set-variable",
   "{{this.name}}",
-  "{{this.value}}"
+  &{{../prefix}}_{{@index}}_value
 );
 {{else if (eq this.type "if")}}
 {{#if this.then.length}}
@@ -113,11 +123,14 @@ neo::types::play_sound_event {{../prefix}}_{{@index}}("play-sound", "{{this.name
 {{else if (eq this.type "execute-script")}}
 neo::types::execute_script_event {{../prefix}}_{{@index}}("execute-script", "{{this.script}}");
 {{else if (eq this.type "move-camera-to")}}
+{{>valuePartial prefix=(concat ../prefix "_" @index "_x") value=(valuedef this.x 0)}}
+{{>valuePartial prefix=(concat ../prefix "_" @index "_y") value=(valuedef this.y 0)}}
+{{>valuePartial prefix=(concat ../prefix "_" @index "_duration") value=(valuedef this.duration 200)}}
 neo::types::move_camera_to_event {{../prefix}}_{{@index}}(
   "move-camera-to",
-  {{valuedef this.x 0}},
-  {{valuedef this.y 0}},
-  {{valuedef this.duration 200}},
+  &{{../prefix}}_{{@index}}_x_value,
+  &{{../prefix}}_{{@index}}_y_value,
+  &{{../prefix}}_{{@index}}_duration_value,
   {{valuedef this.allowDiagonal true}},
   "{{valuedef this.directionPriority "horizontal"}}"
 );

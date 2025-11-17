@@ -208,12 +208,14 @@ namespace neo::scenes
     {{/if}}
     {{#if this.player}}
     true,
-    { {{this.player.x}}, {{this.player.y}} },
+    {{this.player.x}},
+    {{this.player.y}},
     neo::types::direction::{{uppercase (valuedef this.player.direction 'down')}},
     bn::sprite_items::{{valuedef this.player.sprite "sprite_default"}},
     {{else}}
     false,
-    { 0, 0 },
+    0,
+    0,
     neo::types::direction::DOWN,
     bn::sprite_items::sprite_default,
     {{/if}}
@@ -241,7 +243,8 @@ namespace neo::scenes
     0,
     nullptr,
     false,
-    { 0, 0 },
+    0,
+    0,
     neo::types::direction::DOWN,
     bn::sprite_items::sprite_default,
     nullptr,

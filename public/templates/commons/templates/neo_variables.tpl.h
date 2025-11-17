@@ -9,20 +9,67 @@
 
 namespace neo::variables
 {
+  struct value
+  {
+    int int_value;
+    bool bool_value;
+    bn::string_view str_value;
+
+    value(int val_, bool bool_val_, bn::string_view str_val_):
+      int_value(val_),
+      bool_value(bool_val_),
+      str_value(str_val_) {}
+
+    inline int as_int ()
+    {
+      return int_value;
+    }
+
+    inline bool as_bool ()
+    {
+      return bool_value;
+    }
+
+    inline bn::string_view as_string ()
+    {
+      return str_value;
+    }
+  };
+
   struct registry
   {
-    bn::unordered_map<bn::string_view, bn::string_view, {{valuesCount variables}}> all;
+    bn::unordered_map<bn::string_view, neo::variables::value*, {{valuesCount variables}}> all;
 
     registry(): all()
     {
       {{#each variables}}
       {{#each (entries this.values) }}
-      all.insert_or_assign("{{this.[0]}}", "{{this.[1]}}");
+      neo::variables::value value_{{@../index}}_{{@index}}(
+        {{int this.[1]}},
+        {{bool this.[1]}},
+        "{{this.[1]}}"
+      );
+      all.insert_or_assign(
+        "{{this.[0]}}",
+        &value_{{@../index}}_{{@index}}
+      );
       {{/each}}
       {{/each}}
     }
 
-    inline void set(bn::string_view key, bn::string_view value)
+    inline bool has(bn::string_view key)
+    {
+      return all.find(key) != all.end();
+    }
+
+    inline neo::variables::value& get(bn::string_view key)
+    {
+      auto it = all.find(key);
+      BN_ASSERT(it != all.end(), "Variable not found: ", key);
+      return *(it->second);
+    }
+
+    inline void set(bn::string_view key, neo::variables::value* value)
     {
       auto it = all.find(key);
       BN_ASSERT(it != all.end(), "Variable not found: ", key);

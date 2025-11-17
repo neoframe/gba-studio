@@ -8,6 +8,8 @@
 #include <bn_sprite_item.h>
 #include <bn_vector.h>
 
+#include <neo_variables.h>
+
 namespace neo::types
 {
   static constexpr int SCREEN_WIDTH = 240;
@@ -21,6 +23,72 @@ namespace neo::types
     DOWN
   };
 
+  struct event_value
+  {
+    bn::string_view type;
+    neo::variables::value* value;
+
+    event_value(bn::string_view type_, neo::variables::value* value_):
+      type(type_), value(value_) {}
+
+    inline int as_int(neo::variables::registry& variables)
+    {
+      if (type == "variable")
+      {
+        if (!variables.has(value->as_string()))
+        {
+          BN_LOG("Variable not found: ", value->as_string());
+          return 0;
+        }
+
+        auto var_value = variables.get(value->as_string());
+        return var_value.as_int();
+      }
+      else
+      {
+        return value->as_int();
+      }
+    }
+
+    inline bool as_bool(neo::variables::registry& variables)
+    {
+      if (type == "variable")
+      {
+        if (!variables.has(value->as_string()))
+        {
+          BN_LOG("Variable not found: ", value->as_string());
+          return false;
+        }
+
+        auto var_value = variables.get(value->as_string());
+        return var_value.as_bool();
+      }
+      else
+      {
+        return value->as_bool();
+      }
+    }
+
+    inline bn::string_view as_string(neo::variables::registry& variables)
+    {
+      if (type == "variable")
+      {
+        if (!variables.has(value->as_string()))
+        {
+          BN_LOG("Variable not found: ", value->as_string());
+          return "";
+        }
+
+        auto var_value = variables.get(value->as_string());
+        return var_value.as_string();
+      }
+      else
+      {
+        return value->as_string();
+      }
+    }
+  };
+
   struct event
   {
     bn::string_view type;
@@ -28,25 +96,26 @@ namespace neo::types
 
   struct wait_event: event
   {
-    int duration;
-    wait_event(bn::string_view type_, int duration_):
+    event_value* duration;
+    wait_event(bn::string_view type_, event_value* duration_):
       event(type_), duration(duration_) {}
   };
 
   struct fade_event: event
   {
-    int duration;
-    fade_event(bn::string_view type_, int duration_):
+    event_value* duration;
+    fade_event(bn::string_view type_, event_value* duration_):
       event(type_), duration(duration_) {}
   };
 
   struct scene_event: event
   {
     bn::string_view target;
-    int* start_position;
+    event_value* start_x;
+    event_value* start_y;
     neo::types::direction start_direction;
-    scene_event(bn::string_view type_, bn::string_view target_, int* start_position_, neo::types::direction start_direction_):
-      event(type_), target(target_), start_position(start_position_), start_direction(start_direction_) {}
+    scene_event(bn::string_view type_, bn::string_view target_, event_value* start_x_, event_value* start_y_, neo::types::direction start_direction_):
+      event(type_), target(target_), start_x(start_x_), start_y(start_y_), start_direction(start_direction_) {}
   };
 
   struct button_event: event
@@ -82,8 +151,8 @@ namespace neo::types
   struct set_variable_event: event
   {
     bn::string_view key;
-    bn::string_view value;
-    set_variable_event(bn::string_view type_, bn::string_view key_, bn::string_view value_):
+    neo::variables::value* value;
+    set_variable_event(bn::string_view type_, bn::string_view key_, neo::variables::value* value_):
       event(type_), key(key_), value(value_) {}
   };
 
@@ -210,16 +279,16 @@ namespace neo::types
 
   struct move_camera_to_event: event
   {
-    int x;
-    int y;
-    int duration;
+    event_value* x;
+    event_value* y;
+    event_value* duration;
     bool allow_diagonal;
     bn::string_view direction_priority;
     move_camera_to_event(
       bn::string_view type_,
-      int x_,
-      int y_,
-      int duration_,
+      event_value* x_,
+      event_value* y_,
+      event_value* duration_,
       bool allow_diagonal_,
       bn::string_view direction_priority_
     ):
@@ -353,7 +422,8 @@ namespace neo::types
     event** events;
     // Player
     bool has_player;
-    int start_position[2];
+    int start_x;
+    int start_y;
     neo::types::direction start_direction;
     bn::sprite_item player_sprite;
     // Map data
