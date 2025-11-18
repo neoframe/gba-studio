@@ -45,6 +45,7 @@ export interface SceneProps
 export interface SceneState {
   size: [number, number];
   isMouseDown: boolean;
+  isMouseOver: boolean;
   cameraEnabled: boolean;
   cameraPosition: [number, number];
 }
@@ -59,14 +60,17 @@ const Scene = ({
   onMove,
   ...rest
 }: SceneProps) => {
+  const moveableRef = useRef<HTMLDivElement>(null);
   const backgroundRef = useRef<HTMLCanvasElement>(null);
+  const backgroundImageRef = useRef<HTMLImageElement>(null);
   const { zoom, mouseX, offsetX, mouseY, offsetY } = useInfiniteCanvas();
   const { eventEmitter, project, resourcesPath, backgrounds } = useApp();
   const { selectedScene, selectedItem, tool } = useCanvas();
-  const { setTilePosition } = useEditor();
+  const { tileX, tileY, setTilePosition } = useEditor();
   const [state, dispatch] = useReducer(mockState<SceneState>, {
     size: [240, 160],
     isMouseDown: false,
+    isMouseOver: false,
     cameraEnabled: false,
     cameraPosition: [0, 0],
   });
@@ -116,6 +120,8 @@ const Scene = ({
   const updateSize = useCallback(async () => {
     try {
       const [width, height] = await getImageSize(backgroundPath);
+      backgroundImageRef.current = null;
+
       dispatch({ size: [Math.max(240, width), Math.max(160, height)] });
     } catch {
       dispatch({ size: [240, 160] });
@@ -159,17 +165,66 @@ const Scene = ({
       return;
     }
 
-    const img = await loadImage(backgroundPath);
+    if (!backgroundImageRef.current) {
+      backgroundImageRef.current = await loadImage(backgroundPath);
+    }
+
     canvas.width = state.size[0];
     canvas.height = state.size[1];
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  }, [backgroundPath, state.size]);
+    ctx.drawImage(
+      backgroundImageRef.current, 0, 0, canvas.width, canvas.height);
+
+    if (
+      (scene.map?.collisions?.length || 0) > 0 &&
+      scene.sceneType === '2d-top-down'
+    ) {
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+
+      scene.map?.collisions?.forEach((line, y) => {
+        line.forEach((cell, x) => {
+          if (cell === '1') {
+            ctx.fillRect(
+              x * gridSize,
+              y * gridSize,
+              gridSize,
+              gridSize
+            );
+          }
+        });
+      });
+    }
+
+    // Draw mouse helper
+    if (state.isMouseOver) {
+      ctx.fillStyle = 'rgba(160, 160, 160, 0.5)';
+      ctx.strokeStyle = 'rgba(160, 160, 160, 1)';
+      ctx.lineWidth = 2;
+
+      ctx.fillRect(
+        tileToPixel(tileX || 0, gridSize),
+        tileToPixel(tileY || 0, gridSize),
+        gridSize,
+        gridSize,
+      );
+
+      ctx.strokeRect(
+        tileToPixel(tileX || 0, gridSize),
+        tileToPixel(tileY || 0, gridSize),
+        gridSize,
+        gridSize,
+      );
+    }
+  }, [
+    backgroundPath, gridSize, tileX, tileY,
+    scene,
+    state.size, state.isMouseOver,
+  ]);
 
   useEffect(() => {
-    drawBackground();
+    requestAnimationFrame(drawBackground);
   }, [drawBackground, state.size, zoom]);
 
   const onSelect_ = useCallback((e: MouseEvent<HTMLDivElement>) => {
@@ -300,17 +355,23 @@ const Scene = ({
         scene.map!.height = tileHeight;
       }
 
+      requestAnimationFrame(drawBackground);
       onChange?.(scene);
     }
   }, [
     offsetX, offsetY, zoom, gridSize, sceneConfig, tool, tileWidth, tileHeight,
-    setTilePosition, onChange, checkCollisionsArray,
+    setTilePosition, onChange, checkCollisionsArray, drawBackground,
     state.isMouseDown,
     scene,
   ]);
 
+  const onMouseEnter = useCallback(() => {
+    dispatch({ isMouseOver: true });
+  }, []);
+
   const onMouseOut = useCallback(() => {
     setTilePosition();
+    dispatch({ isMouseOver: false });
   }, [setTilePosition]);
 
   const onMouseDown = useCallback((e: MouseEvent<HTMLDivElement>) => {
@@ -352,10 +413,11 @@ const Scene = ({
       scene.map!.height = tileHeight;
     }
 
+    requestAnimationFrame(drawBackground);
     onChange?.(scene);
   }, [
     gridSize, offsetX, offsetY, sceneConfig, tool, zoom, tileHeight, tileWidth,
-    onChange, checkCollisionsArray,
+    onChange, checkCollisionsArray, drawBackground,
     scene,
   ]);
 
@@ -370,6 +432,7 @@ const Scene = ({
   return (
     <Moveable
       { ...rest }
+      ref={moveableRef}
       strategy="position"
       onMouseDown={onSelect_}
       onMove={onMove?.bind(null, scene)}
@@ -393,7 +456,7 @@ const Scene = ({
         <Card
           className={classNames(
             '!relative bg-cover bg-center transition-[outline-width]',
-            'duration-200 overflow-hidden',
+            'duration-200 overflow-hidden group',
             { '!outline-4 !outline-(--accent-9)': selectedScene === scene },
             className
           )}
@@ -401,6 +464,7 @@ const Scene = ({
             width: state.size[0],
             height: state.size[1],
           }}
+          onMouseOver={onMouseEnter}
           onMouseMove={onMouseMove}
           onMouseOut={onMouseOut}
           onMouseDown={onMouseDown}
@@ -428,24 +492,6 @@ const Scene = ({
               }}
             />
           )}
-
-          { scene.sceneType === '2d-top-down' && scene.map?.collisions
-            ?.map((line, y) => (
-              line.map((cell, x) => (
-                cell === '1' && (
-                  <div
-                    key={`${x}-${y}`}
-                    className="absolute bg-red-500/50 pointer-events-none"
-                    style={{
-                      left: x * gridSize,
-                      top: y * gridSize,
-                      width: gridSize,
-                      height: gridSize,
-                    }}
-                  />
-                )
-              ))
-            )) }
 
           { sensors.map((sensor, i) => (
             <Sensor
