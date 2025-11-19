@@ -38,7 +38,7 @@ namespace neo::variables
 
   struct registry
   {
-    bn::unordered_map<bn::string_view, neo::variables::value*, {{valuesCount variables}}> all;
+    bn::unordered_map<bn::string_view, neo::variables::value*, {{or (valuesCount variables) 1}}> all;
 
     registry(): all()
     {
