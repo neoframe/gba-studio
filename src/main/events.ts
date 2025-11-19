@@ -44,6 +44,10 @@ export const createGraphicsFileWatcher = async (
 ) => {
   const projectBase = path.dirname(projectPath);
 
+  if (!fs.existsSync(path.join(projectBase, 'graphics'))) {
+    await fs.promises.mkdir(path.join(projectBase, 'graphics'));
+  }
+
   fs.watch(
     path.join(projectBase, 'graphics'),
     { signal },
@@ -84,6 +88,10 @@ export const createAudioFileWatcher = async (
   signal?: AbortSignal,
 ) => {
   const projectBase = path.dirname(projectPath);
+
+  if (!fs.existsSync(path.join(projectBase, 'audio'))) {
+    await fs.promises.mkdir(path.join(projectBase, 'audio'));
+  }
 
   fs.watch(
     path.join(projectBase, 'audio'),
