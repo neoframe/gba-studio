@@ -56,9 +56,9 @@ const Sprite = ({
       style={{
         ...style,
         backgroundImage: !sprite?._file
-          ? `url(file://${resourcesPath}/public/templates` +
-            `/commons/graphics/sprite_default.bmp)`
-          : `url(project://graphics/${getGraphicName(sprite._file)}.bmp)`,
+          ? `url("file://${resourcesPath}/public/templates` +
+            `/commons/graphics/sprite_default.bmp")`
+          : `url("project://graphics/${getGraphicName(sprite._file)}.bmp")`,
         backgroundSize: 'cover',
         backgroundPosition: position,
         backgroundRepeat: 'no-repeat',
