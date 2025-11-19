@@ -159,10 +159,18 @@ export const createProjectWindow = async (projectPath: string) => {
       .join(path.dirname(projectPath), filePath)).toString());
   });
 
+  ses.protocol.handle('resources', req => {
+    const filePath = req.url.replace('resources://', '');
+
+    return net.fetch(url.pathToFileURL(path
+      .join(getResourcesDir(), filePath)).toString());
+  });
+
   const abortController = new AbortController();
 
   win.on('close', () => {
     ses.protocol.unhandle('project');
+    ses.protocol.unhandle('resources');
     abortController.abort();
   });
 

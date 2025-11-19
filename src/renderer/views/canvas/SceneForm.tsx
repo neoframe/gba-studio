@@ -13,7 +13,6 @@ import { classNames, set } from '@junipero/react';
 import type { GameScene } from '../../../types';
 import { getGraphicName, getImageSize, pixelToTile } from '../../../helpers';
 import { SceneFormContext } from '../../services/contexts';
-import { useApp } from '../../services/hooks';
 import BackgroundsListField from '../../components/BackgroundsListField';
 import EventsField from '../../components/EventsField';
 import EventValueField from '../../components/EventValueField';
@@ -33,8 +32,6 @@ const SceneForm = ({
   scene,
   onChange,
 }: SceneFormProps) => {
-  const { resourcesPath } = useApp();
-
   const onNameChange = useCallback((e: ChangeEvent<HTMLHeadingElement>) => {
     const name = (e.currentTarget.textContent || 'Untitled')
       .trim().slice(0, 32);
@@ -55,7 +52,7 @@ const SceneForm = ({
 
   const onBackgroundChange = useCallback(async (value: string) => {
     const [width, height] = await getImageSize(!value || value === 'bg_default'
-      ? `file://${resourcesPath}/public/templates/` +
+      ? `resources://public/templates/` +
         `commons/graphics/bg_default.bmp`
       : `project://graphics/${value}.bmp`);
 
@@ -75,7 +72,7 @@ const SceneForm = ({
     }
 
     onValueChange('background', getGraphicName(value || 'bg_default'));
-  }, [scene, resourcesPath, onValueChange]);
+  }, [scene, onValueChange]);
 
   const onTypeChange = useCallback((name: string, value: string) => {
 

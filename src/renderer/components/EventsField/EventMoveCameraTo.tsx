@@ -18,7 +18,7 @@ const EventMoveCameraTo = ({
   event,
   onValueChange,
 }: EventMoveCameraToProps) => {
-  const { eventEmitter, backgrounds, resourcesPath } = useApp();
+  const { eventEmitter, backgrounds } = useApp();
   const { scene } = useSceneForm();
   const [size, setSize] = useState([240, 160]);
 
@@ -29,10 +29,10 @@ const EventMoveCameraTo = ({
   const backgroundPath = useMemo(() => (
     !background?._file || !scene?.background ||
     scene.background === 'bg_default'
-      ? `file://${resourcesPath}/public/templates/` +
+      ? `resources://public/templates/` +
         `commons/graphics/bg_default.bmp`
       : `project://graphics/${scene.background}.bmp`
-  ), [scene, background?._file, resourcesPath]);
+  ), [scene, background?._file]);
 
   const updateSize = useCallback(async () => {
     try {

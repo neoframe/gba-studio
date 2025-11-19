@@ -64,7 +64,7 @@ const Scene = ({
   const backgroundRef = useRef<HTMLCanvasElement>(null);
   const backgroundImageRef = useRef<HTMLImageElement>(null);
   const { zoom, mouseX, offsetX, mouseY, offsetY } = useInfiniteCanvas();
-  const { eventEmitter, project, resourcesPath, backgrounds } = useApp();
+  const { eventEmitter, project, backgrounds } = useApp();
   const { selectedScene, selectedItem, tool } = useCanvas();
   const { tileX, tileY, setTilePosition } = useEditor();
   const [state, dispatch] = useReducer(mockState<SceneState>, {
@@ -112,10 +112,10 @@ const Scene = ({
 
   const backgroundPath = useMemo(() => (
     !background?._file || !scene.background || scene.background === 'bg_default'
-      ? `file://${resourcesPath}/public/templates/` +
+      ? `resources://public/templates/` +
         `commons/graphics/bg_default.bmp`
       : `project://graphics/${scene.background}.bmp`
-  ), [scene.background, background?._file, resourcesPath]);
+  ), [scene.background, background?._file]);
 
   const updateSize = useCallback(async () => {
     try {

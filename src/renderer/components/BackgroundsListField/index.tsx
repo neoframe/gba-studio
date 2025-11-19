@@ -14,7 +14,7 @@ const BackgroundsListField = ({
   defaultValue,
   onValueChange,
 }: BackgroundsListFieldProps) => {
-  const { backgrounds, resourcesPath } = useApp();
+  const { backgrounds } = useApp();
   const val = value ?? defaultValue ?? '';
 
   return (
@@ -24,8 +24,7 @@ const BackgroundsListField = ({
           <div className="flex items-center gap-2">
             <Avatar
               src={!val || val === 'bg_default'
-                ? `file://${resourcesPath}/public/templates` +
-                  `/commons/graphics/bg_default.bmp`
+                ? `resources://public/templates/commons/graphics/bg_default.bmp`
                 : `project://graphics/${val}.bmp`}
               fallback=""
             />
@@ -39,7 +38,7 @@ const BackgroundsListField = ({
         >
           <div className="flex items-center gap-2">
             <Avatar
-              src={`file://${resourcesPath}/public/templates` +
+              src={`resources://public/templates` +
                 `/commons/graphics/bg_default.bmp`}
               fallback=""
               size="1"

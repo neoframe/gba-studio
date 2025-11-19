@@ -57,7 +57,11 @@ export default function removeLocalesPlugin (
   arch: string,
   next: (err: Error | null) => void
 ) {
-  if (pkg.build?.electronLanguages && pkg.build.electronLanguages.length > 0) {
+  if (
+    pkg.build?.electronLanguages &&
+    pkg.build.electronLanguages.length > 0 &&
+    !['win32'].includes(platform)
+  ) {
     // Remove from app
     const localesPath = getLanguageFolderPath(buildPath, platform);
     let removed = 0;
@@ -79,13 +83,6 @@ export default function removeLocalesPlugin (
       });
 
       log(`Removed ${removed}/${localeDirs.length} locale directories.`);
-    }
-
-    // Remove from Electron Framework
-    if (platform !== 'darwin' && platform !== 'mas') {
-      next(null);
-
-      return;
     }
 
     const frameworkLocalesPath = getElectronLanguageFolderPath(

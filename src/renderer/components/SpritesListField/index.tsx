@@ -14,7 +14,7 @@ const SpritesListField = ({
   defaultValue,
   onValueChange,
 }: SpritesListFieldProps) => {
-  const { sprites, resourcesPath } = useApp();
+  const { sprites } = useApp();
   const val = value ?? defaultValue;
 
   return (
@@ -24,7 +24,7 @@ const SpritesListField = ({
           <div className="flex items-center gap-2">
             <Avatar
               src={!val
-                ? `file://${resourcesPath}public/templates` +
+                ? `resources://public/templates` +
                   `/commons/graphics/sprite_default.bmp`
                 : `project://graphics/${val}.bmp`}
               fallback=""
@@ -39,7 +39,7 @@ const SpritesListField = ({
           onClick={() => onValueChange?.('')}
         >
           <Avatar
-            src={`file://${resourcesPath}public/templates` +
+            src={`resources://public/templates` +
               `/commons/graphics/sprite_default.bmp`}
             fallback=""
             size="1"
