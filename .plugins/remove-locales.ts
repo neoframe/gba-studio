@@ -82,6 +82,12 @@ export default function removeLocalesPlugin (
     }
 
     // Remove from Electron Framework
+    if (platform !== 'darwin' && platform !== 'mas') {
+      next(null);
+
+      return;
+    }
+
     const frameworkLocalesPath = getElectronLanguageFolderPath(
       buildPath,
       platform
