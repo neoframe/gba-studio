@@ -200,6 +200,7 @@ export interface SceneEvent {
   name?: string;
   // Internals
   id: string;
+  _name?: string;
   _collapsed?: boolean;
 }
 

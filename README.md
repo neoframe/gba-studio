@@ -7,7 +7,7 @@ GB Studio, but worse & for the GBA
 - [x] File changes detection outside of GBA Studio
 - [x] Copy/paste events
 - [x] Use variables for any value
-- [ ] Rename events
+- [x] Rename events
 - [ ] Move target point from the target scene
 - [ ] Windows signed installer
 - [ ] Side scroller scene type

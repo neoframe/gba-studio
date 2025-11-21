@@ -1,4 +1,12 @@
-import { type MouseEvent, useCallback, useMemo, useRef, useState } from 'react';
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   CaretDownIcon,
   CaretRightIcon,
@@ -66,28 +74,26 @@ const Event = ({
     setNodeRef,
   } = useSortable({ id: event.id });
 
+  useEffect(() => {
+    if (!renaming) {
+      return;
+    }
+
+    nameRef.current?.focus();
+  }, [renaming]);
+
   const definition = useMemo(() => (
     getEventDefinition(event.type)
   ), [event.type]);
 
-  const toggle = useCallback((e: MouseEvent<HTMLAnchorElement>) => {
+  const toggle = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-
-    if (renaming) {
-      return;
-    }
 
     setOpened(o => !o);
     event._collapsed = !opened;
     onValueChange?.(event);
-  }, [renaming, opened, event, onValueChange]);
-
-  // TODO: allow to rename events
-  // const onRenameClick = () => {
-  //   setRenaming(true);
-  //   nameRef.current?.focus();
-  // };
+  }, [opened, event, onValueChange]);
 
   const onDeleteClick = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -119,9 +125,47 @@ const Event = ({
     onAppend?.(event, clipboard as SceneEvent);
   }, [onAppend, event, clipboard]);
 
+  const onRename = useCallback(() => {
+    if (!renaming) {
+      return;
+    }
+
+    const newName = nameRef.current?.innerText.trim();
+
+    if (newName !== definition.name) {
+      event._name = newName;
+      onValueChange?.(event);
+    }
+
+    setRenaming(false);
+  }, [renaming, definition.name, event, onValueChange]);
+
+  const onNameKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.currentTarget.blur();
+    }
+  };
+
+  const onNameClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    if (e.detail !== 2) {
+      return;
+    }
+
+    setRenaming(true);
+  }, []);
+
+  const onRenameClick = () => {
+    setTimeout(() => {
+      setRenaming(true);
+    }, 200);
+  };
+
   return (
     <div
-      className="bg-(--gray-2)"
+      className="bg-(--gray-2) flex flex-col"
       ref={setNodeRef}
       style={{
         transform: `translate3d(${transform?.x || 0}px, ` +
@@ -129,71 +173,90 @@ const Event = ({
         transition,
       }}
       { ...attributes }
-      { ...listeners }
+      { ...!renaming ? listeners : {} }
     >
-      <a
-        href="#"
-        className="px-3 py-2 flex items-center justify-between"
-        onClick={toggle}
+      <div
+        className="px-3 py-2 w-full flex items-center flex-nowrap"
       >
-        <div className="flex items-center gap-2">
+        <div
+          className={classNames(
+            'flex items-center flex-nowrap justify-start flex-auto gap-2',
+          )}
+        >
           { definition.icon && (
-            <definition.icon className="[&_path]:fill-(--accent-9)" />
+            <div className="flex-none">
+              <definition.icon className="[&_path]:fill-(--accent-9)" />
+            </div>
           ) }
           <div
             ref={nameRef}
+            className={classNames(
+              'whitespace-nowrap',
+              {
+                [
+                'overflow-scroll focus:outline-2 flex-auto' +
+                  'outline-(--accent-9) rounded-xs'
+                ]: renaming,
+                'overflow-hidden text-ellipsis flex-none': !renaming,
+              }
+            )}
             contentEditable={renaming}
             suppressContentEditableWarning
-            className={classNames({
-              [
-              'whitespace-nowrap overflow-scroll focus:outline-2 ' +
-                'outline-(--accent-9) rounded-xs'
-              ]: renaming,
-            })}
-            onBlur={() => setRenaming(false)}
+            onClick={onNameClick}
+            onKeyDown={onNameKeyDown}
+            onBlur={onRename}
           >
-            { definition.name }
+            { event._name || definition.name }
           </div>
-          { opened ? <CaretDownIcon /> : <CaretRightIcon /> }
+          <IconButton
+            variant="ghost"
+            size="1"
+            className="flex-none"
+            onClick={toggle}
+          >
+            { opened ? <CaretDownIcon /> : <CaretRightIcon /> }
+          </IconButton>
         </div>
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger onClick={e => e.stopPropagation()}>
-            <IconButton variant="ghost" size="1">
-              <DotsVerticalIcon />
-            </IconButton>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content align="end">
-            <DropdownMenu.Item onClick={onCopyClick}>
-              Copy event
-            </DropdownMenu.Item>
-            { exists(clipboard) && (
-              <>
-                <DropdownMenu.Item onClick={onPasteBeforeClick}>
-                  Paste event before
-                </DropdownMenu.Item>
-                <DropdownMenu.Item onClick={onPasteAfterClick}>
-                  Paste event after
-                </DropdownMenu.Item>
-                <DropdownMenu.Separator />
-              </>
-            ) }
-            {/* <DropdownMenu.Item onClick={onRenameClick}>
-              Rename event
-            </DropdownMenu.Item>
-            <DropdownMenu.Separator /> */}
-            <DropdownMenu.Item onClick={onPrependClick}>
-              Add event above
-            </DropdownMenu.Item>
-            <DropdownMenu.Item onClick={onAppendClick}>
-              Add event below
-            </DropdownMenu.Item>
-            <DropdownMenu.Separator />
-            <DropdownMenu.Item onClick={onDeleteClick}>
-              Delete event
-            </DropdownMenu.Item>
-          </DropdownMenu.Content>
-        </DropdownMenu.Root>
-      </a>
+        <div className="flex-none flex items-center gap-1">
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger onClick={e => e.stopPropagation()}>
+              <IconButton variant="ghost" size="1">
+                <DotsVerticalIcon />
+              </IconButton>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content align="end">
+              <DropdownMenu.Item onClick={onRenameClick}>
+                Rename event
+              </DropdownMenu.Item>
+              <DropdownMenu.Separator />
+              <DropdownMenu.Item onClick={onCopyClick}>
+                Copy event
+              </DropdownMenu.Item>
+              { exists(clipboard) && (
+                <>
+                  <DropdownMenu.Item onClick={onPasteBeforeClick}>
+                    Paste event before
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item onClick={onPasteAfterClick}>
+                    Paste event after
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Separator />
+                </>
+              ) }
+              <DropdownMenu.Item onClick={onPrependClick}>
+                Add event above
+              </DropdownMenu.Item>
+              <DropdownMenu.Item onClick={onAppendClick}>
+                Add event below
+              </DropdownMenu.Item>
+              <DropdownMenu.Separator />
+              <DropdownMenu.Item onClick={onDeleteClick}>
+                Delete event
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        </div>
+      </div>
       { opened && (
         <div className="px-3 pb-3">
           <Switch value={event.type}>
