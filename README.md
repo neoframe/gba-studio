@@ -8,11 +8,11 @@ GB Studio, but worse & for the GBA
 - [x] Copy/paste events
 - [x] Use variables for any value
 - [x] Rename events
+- [x] Foreground sprites
 - [ ] Move target point from the target scene
 - [ ] Windows signed installer
 - [ ] Side scroller scene type
 - [ ] Parallax backgrounds
-- [ ] Foreground sprites
 - [ ] images auto convert on build
 - [ ] WASM mGBA integration
 - [ ] Portable python & devkitARM
