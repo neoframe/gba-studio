@@ -392,9 +392,9 @@ namespace neo::types
   {
     bn::string_view _id;
     bn::string_view name;
-    int x;
-    int y;
-    int z;
+    event_value* x;
+    event_value* y;
+    event_value* z;
     neo::types::direction direction;
     bn::sprite_item sprite;
     int init_events_count;
@@ -409,9 +409,9 @@ namespace neo::types
   {
     bn::string_view _id;
     bn::string_view name;
-    int x;
-    int y;
-    int z;
+    event_value* x;
+    event_value* y;
+    event_value* z;
     bn::sprite_item sprite;
   };
 
@@ -433,9 +433,9 @@ namespace neo::types
     event** events;
     // Player
     bool has_player;
-    int start_x;
-    int start_y;
-    int start_z;
+    event_value* start_x;
+    event_value* start_y;
+    event_value* start_z;
     neo::types::direction start_direction;
     bn::sprite_item player_sprite;
     // Map data

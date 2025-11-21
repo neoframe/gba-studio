@@ -18,9 +18,9 @@ namespace neo
     inner_sprite.set_camera(game->camera);
     inner_sprite.set_visible(true);
     inner_sprite.set_bg_priority(1);
-    inner_sprite.set_z_order(definition->z);
+    inner_sprite.set_z_order(definition->z->as_int(game->variables));
 
-    set_position(definition->x, definition->y);
+    set_position(definition->x->as_int(game->variables), definition->y->as_int(game->variables));
   }
 
   sprite::~sprite()

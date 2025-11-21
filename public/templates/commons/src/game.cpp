@@ -93,9 +93,9 @@ namespace neo
     {
       BN_LOG("Has player");
 
-      int x = active_scene->start_x;
-      int y = active_scene->start_y;
-      int z = active_scene->start_z;
+      int x = active_scene->start_x->as_int(variables);
+      int y = active_scene->start_y->as_int(variables);
+      int z = active_scene->start_z->as_int(variables);
       neo::types::direction dir = active_scene->start_direction;
 
       if (

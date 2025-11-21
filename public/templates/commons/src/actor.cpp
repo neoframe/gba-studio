@@ -19,10 +19,10 @@ namespace neo
     sprite.set_camera(game->camera);
     sprite.set_visible(true);
     sprite.set_bg_priority(1);
-    sprite.set_z_order(actor_definition_->z);
+    sprite.set_z_order(actor_definition_->z->as_int(game->variables));
 
     set_direction(definition->direction);
-    set_position(definition->x, definition->y);
+    set_position(definition->x->as_int(game->variables), definition->y->as_int(game->variables));
   }
 
   actor::~actor()
