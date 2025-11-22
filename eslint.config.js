@@ -5,7 +5,7 @@ export default defineConfig(
   {
     ignores: [
       'node_modules', 'dist', '.yarn', '.dev', 'build', '.vite', 'out',
-      'public',
+      'public', '**/.vite',
     ],
   },
   {

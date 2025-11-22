@@ -3,7 +3,7 @@ import { Heading, Inset, Separator, Text, TextField } from '@radix-ui/themes';
 import { classNames, set } from '@junipero/react';
 
 import type { GameScene, GameSprite } from '../../../types';
-import { useCanvas, useDelayedCallback } from '../../services/hooks';
+import { useCanvas } from '../../services/hooks';
 import SpritesListField from '../../components/SpritesListField';
 import EventValueField from '../../components/EventValueField';
 
@@ -17,7 +17,6 @@ const SpriteForm = ({
   onChange,
 }: SpriteFormProps) => {
   const { selectedScene } = useCanvas();
-  const onDelayedChange = useDelayedCallback(onChange, 300);
 
   const onNameChange = useCallback((e: ChangeEvent<HTMLHeadingElement>) => {
     const name = (e.currentTarget.textContent || 'Untitled')
@@ -44,14 +43,6 @@ const SpriteForm = ({
     set(sprite, name, value);
     onChange?.(selectedScene);
   }, [onChange, sprite, selectedScene]);
-
-  const onTextChange = useCallback((
-    name: string,
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
-    set(sprite, name, e.target.value);
-    onDelayedChange?.(selectedScene);
-  }, [onDelayedChange, sprite, selectedScene]);
 
   return (
     <div className="p-3 w-full h-full overflow-x-hidden overflow-y-scroll">
