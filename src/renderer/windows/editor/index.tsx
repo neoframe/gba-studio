@@ -3,12 +3,13 @@ import { classNames, mockState } from '@junipero/react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import { type EditorContextType, EditorContext } from '../../services/contexts';
-// import { useBridgeListener } from '../../services/hooks';
+import { useApp, useBridgeListener } from '../../services/hooks';
 import views, { defaultView } from '../../views';
 import LeftSidebar from './LeftSidebar';
 import TitleBar from './TitleBar';
 import RightSidebar from './RightSidebar';
 import BottomBar from './BottomBar';
+import LogsStore from './LogsStore';
 
 export interface EditorState {
   view: string;
@@ -23,6 +24,7 @@ export interface EditorState {
 }
 
 const Editor = () => {
+  const { project } = useApp();
   const [state, dispatch] = useReducer(mockState<EditorState>, {
     view: 'canvas',
     leftSidebarOpened: true,
@@ -35,10 +37,13 @@ const Editor = () => {
     tileY: undefined,
   });
 
-  // TODO: re-enable when preview works
-  // useBridgeListener('build-completed', () => {
-  //   dispatch({ view: 'preview' });
-  // }, []);
+  useBridgeListener('build-completed', () => {
+    const emulatorType = project?.settings?.emulatorType || 'internal';
+
+    if (emulatorType === 'internal') {
+      dispatch({ view: 'preview' });
+    }
+  }, []);
 
   const {
     view: View,
@@ -122,37 +127,39 @@ const Editor = () => {
 
   return (
     <EditorContext.Provider value={getContext()}>
-      <Provider>
-        <div
-          className={classNames(
-            'fixed w-screen h-screen top-0 left-0 pointer-events-none z-1000',
-            'flex items-stretch',
-          )}
-        >
+      <LogsStore>
+        <Provider>
           <div
             className={classNames(
-              'fixed top-0 left-0 w-screen h-[15px] app-drag',
-              'pointer-events-auto'
+              'fixed w-screen h-screen top-0 left-0 pointer-events-none z-1000',
+              'flex items-stretch',
             )}
-          />
+          >
+            <div
+              className={classNames(
+                'fixed top-0 left-0 w-screen h-[15px] app-drag',
+                'pointer-events-auto'
+              )}
+            />
 
-          <LeftSidebar>
-            <LeftSidebarContent />
-          </LeftSidebar>
-          <TitleBar
-            rightSidebarEnabled={!!RightSidebarContent}
-          />
-          { RightSidebarContent && (
-            <RightSidebar>
-              <RightSidebarContent />
-            </RightSidebar>
-          ) }
-          <BottomBar>
-            <BottomBarContent />
-          </BottomBar>
-        </div>
-        <View />
-      </Provider>
+            <LeftSidebar>
+              <LeftSidebarContent />
+            </LeftSidebar>
+            <TitleBar
+              rightSidebarEnabled={!!RightSidebarContent}
+            />
+            { RightSidebarContent && (
+              <RightSidebar>
+                <RightSidebarContent />
+              </RightSidebar>
+            ) }
+            <BottomBar>
+              <BottomBarContent />
+            </BottomBar>
+          </div>
+          <View />
+        </Provider>
+      </LogsStore>
     </EditorContext.Provider>
   );
 };

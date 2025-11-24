@@ -8,6 +8,9 @@ import type {
   RecentProject,
 } from '../types';
 
+const queryParams = new URLSearchParams(globalThis.location.search);
+const isDev = queryParams.get('isDev') === 'true';
+
 contextBridge.exposeInMainWorld('electron', {
   // EventTarget
   addEventListener: (channel: string, func: (...args: any[]) => void) => {
@@ -74,4 +77,5 @@ contextBridge.exposeInMainWorld('electron', {
   platform: process.platform,
   isDarwin: process.platform === 'darwin',
   isWindows: process.platform === 'win32',
+  isDev,
 } as Omit<AppBridge, 'dispatchEvent'>);

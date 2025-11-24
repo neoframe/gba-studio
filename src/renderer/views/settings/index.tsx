@@ -42,6 +42,15 @@ const Settings = () => {
     dispatch({ project: state.project });
   }, [state.project]);
 
+  const onValueChange = useCallback((
+    name: string,
+    value: any
+  ) => {
+    set(state.project, name, value);
+    dispatch({ project: state.project });
+    onProjectChange?.(state.project);
+  }, [state.project, onProjectChange]);
+
   const onFieldBlur = useCallback(() => {
     onProjectChange?.(state.project);
   }, [state.project, onProjectChange]);
@@ -85,6 +94,20 @@ const Settings = () => {
 
     if (config) {
       set(config, name, e.target.value);
+      dispatch({ project: state.project });
+    }
+  }, [state.project]);
+
+  const onConfigurationValueChange = useCallback((
+    id: string,
+    name: string,
+    value: any
+  ) => {
+    const config = state.project.configurations
+      ?.find(c => c.id === id);
+
+    if (config) {
+      set(config, name, value);
       dispatch({ project: state.project });
     }
   }, [state.project]);
@@ -169,6 +192,7 @@ const Settings = () => {
                 settings={state.project.settings || {}}
                 onTextChange={onTextChange}
                 onFieldBlur={onFieldBlur}
+                onValueChange={onValueChange}
               />
             </Tabs.Content>
             { state.project.configurations?.map(config => (
@@ -178,6 +202,8 @@ const Settings = () => {
                   settings={config.settings || {}}
                   onTextChange={onConfigurationTextChange.bind(null, config.id)}
                   onFieldBlur={onFieldBlur}
+                  onValueChange={onConfigurationValueChange
+                    .bind(null, config.id)}
                 />
               </Tabs.Content>
             )) }

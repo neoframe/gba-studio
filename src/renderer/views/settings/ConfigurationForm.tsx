@@ -1,4 +1,5 @@
-import { Card, Heading, Text, TextField } from '@radix-ui/themes';
+import type { ChangeEvent } from 'react';
+import { Card, Heading, Select, Text, TextField } from '@radix-ui/themes';
 
 import type { ProjectSettings } from '../../../types';
 
@@ -6,7 +7,8 @@ export interface ConfigurationFormProps {
   default?: boolean;
   name?: string;
   settings: ProjectSettings;
-  onTextChange: (name: string, e: React.ChangeEvent<HTMLInputElement>) => void;
+  onTextChange: (name: string, e: ChangeEvent<HTMLInputElement>) => void;
+  onValueChange: (name: string, value: string) => void;
   onFieldBlur: () => void;
 }
 
@@ -15,6 +17,7 @@ const ConfigurationForm = ({
   name,
   default: isDefault,
   onTextChange,
+  onValueChange,
   onFieldBlur,
 }: ConfigurationFormProps) => {
   return (
@@ -52,16 +55,33 @@ const ConfigurationForm = ({
         <Heading size="3">Emulator settings</Heading>
         <Card className="!flex flex-col gap-4">
           <div className="flex flex-col items-start gap-2">
-            <Text>Emulator command</Text>
-            <TextField.Root
+            <Text>Emulator</Text>
+            <Select.Root
               size="3"
-              value={settings?.emulatorCommand || ''}
-              onChange={onTextChange.bind(null, 'settings.emulatorCommand')}
-              placeholder="open -a /Applications/mGBA.app"
-              className="w-96"
-              onBlur={onFieldBlur}
-            />
+              value={settings?.emulatorType || 'internal'}
+              onValueChange={onValueChange.bind(null, 'settings.emulatorType')}
+            >
+              <Select.Trigger className="w-96" />
+              <Select.Content>
+                <Select.Item value="internal">Internal preview</Select.Item>
+                <Select.Item value="external">External</Select.Item>
+              </Select.Content>
+            </Select.Root>
           </div>
+
+          { settings?.emulatorType === 'external' && (
+            <div className="flex flex-col items-start gap-2">
+              <Text>Emulator command</Text>
+              <TextField.Root
+                size="3"
+                value={settings?.emulatorCommand || ''}
+                onChange={onTextChange.bind(null, 'settings.emulatorCommand')}
+                placeholder="open -a /Applications/mGBA.app"
+                className="w-96"
+                onBlur={onFieldBlur}
+              />
+            </div>
+          ) }
         </Card>
       </div>
     </Card>

@@ -39,7 +39,6 @@ export const createSelectionWindow = async () => {
       contextIsolation: true,
       devTools: false,
       ...MAIN_WINDOW_VITE_DEV_SERVER_URL && {
-        webSecurity: false,
         devTools: true,
       },
     },
@@ -126,7 +125,6 @@ export const createProjectWindow = async (projectPath: string) => {
       partition: projectName,
       devTools: false,
       ...MAIN_WINDOW_VITE_DEV_SERVER_URL && {
-        webSecurity: false,
         devTools: true,
       },
     },
@@ -186,6 +184,7 @@ export const createProjectWindow = async (projectPath: string) => {
     url.searchParams.set('projectPath', projectPath);
     url.searchParams.set('projectBase', path.dirname(projectPath));
     url.searchParams.set('resourcesPath', getResourcesDir());
+    url.searchParams.set('isDev', '' + !app.isPackaged);
     url.searchParams.set('theme',
       nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
 
@@ -200,6 +199,7 @@ export const createProjectWindow = async (projectPath: string) => {
       { query: {
         projectPath,
         projectBase: path.dirname(projectPath),
+        isDev: '' + !app.isPackaged,
         theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
         resourcesPath: getResourcesDir(),
       } },

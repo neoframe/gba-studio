@@ -13,6 +13,7 @@ import {
   BottomBarContext,
   CanvasContext,
   EditorContext,
+  LogsContext,
   SceneFormContext,
 } from './contexts';
 
@@ -55,6 +56,7 @@ export const useEditor = () => useContext(EditorContext);
 export const useCanvas = () => useContext(CanvasContext);
 export const useSceneForm = () => useContext(SceneFormContext);
 export const useBottomBar = () => useContext(BottomBarContext);
+export const useLogs = () => useContext(LogsContext);
 
 export const useBridgeListener = <T extends any[] = any[]>(
   channel: string,

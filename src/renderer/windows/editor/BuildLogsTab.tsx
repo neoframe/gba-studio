@@ -1,29 +1,24 @@
-import { useCallback, useLayoutEffect, useState } from 'react';
+import { useCallback, useLayoutEffect } from 'react';
 import { IconButton, Kbd, Text, Tooltip } from '@radix-ui/themes';
 import { classNames } from '@junipero/react';
 import { ArrowDownIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import type { BuildMessage } from '../../../types';
-import { useBottomBar, useBridgeListener } from '../../services/hooks';
+import { useBottomBar, useLogs } from '../../services/hooks';
 
 const BuildLogsTab = () => {
-  const [logs, setLogs] = useState<BuildMessage[]>([]);
+  const { buildLogs, clearBuildLogs } = useLogs();
   const { manualScroll, scrolledToBottom, scrollToBottom } = useBottomBar();
-
-  useBridgeListener('build-log', (message: BuildMessage) => {
-    setLogs(prevLogs => [...prevLogs, message].slice(-10000));
-  }, []);
 
   useLayoutEffect(() => {
     if (!manualScroll) {
       scrollToBottom();
     }
-  }, [logs, manualScroll, scrollToBottom]);
+  }, [buildLogs, manualScroll, scrollToBottom]);
 
   const clearLogs = useCallback(() => {
-    setLogs([]);
-  }, []);
+    clearBuildLogs();
+  }, [clearBuildLogs]);
 
   useHotkeys('ctrl+k', () => {
     scrollToBottom();
@@ -78,7 +73,7 @@ const BuildLogsTab = () => {
         </Tooltip>
       </div>
       <pre className="whitespace-pre-wrap font-mono break-words p-4 text-sm">
-        { logs.map((log, index) => (
+        { buildLogs.map((log, index) => (
           <div
             key={index}
             className={classNames(

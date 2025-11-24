@@ -4,6 +4,7 @@ import { createContext } from 'react';
 import type {
   AppPayload,
   AppStorage,
+  BuildMessage,
   GameActor,
   GamePlayer,
   GameProject,
@@ -138,4 +139,16 @@ export const BottomBarContext = createContext<BottomBarContextType>({
   scrolledToBottom: true,
   scrollToBottom: () => {},
   isScrolledToBottom: () => true,
+});
+
+export interface LogsContextType {
+  buildLogs: BuildMessage[];
+  emulatorLogs: string[];
+  clearBuildLogs(): void;
+}
+
+export const LogsContext = createContext<LogsContextType>({
+  buildLogs: [],
+  emulatorLogs: [],
+  clearBuildLogs: () => {},
 });

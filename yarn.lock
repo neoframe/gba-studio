@@ -3310,6 +3310,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@thenick775/mgba-wasm@npm:2.3.4":
+  version: 2.3.4
+  resolution: "@thenick775/mgba-wasm@npm:2.3.4"
+  checksum: 10c0/2abe9b21a2e0f0ac048998c31713a57efac08bc20226f31aafa3dd6a9af99b270df28106ef43054f05c5bce3619b735a0d7a47d07b74f04e2af5bcb922bb823a
+  languageName: node
+  linkType: hard
+
+"@thenick775/mgba-wasm@patch:@thenick775/mgba-wasm@npm%3A2.3.4#~/.yarn/patches/@thenick775-mgba-wasm-npm-2.3.4-5c7024b17d.patch":
+  version: 2.3.4
+  resolution: "@thenick775/mgba-wasm@patch:@thenick775/mgba-wasm@npm%3A2.3.4#~/.yarn/patches/@thenick775-mgba-wasm-npm-2.3.4-5c7024b17d.patch::version=2.3.4&hash=de6816"
+  checksum: 10c0/5c2e8ebd133c6d8d33dcdb09b3b8ef28ef431db7bc0b4bd1cd71cd89260a364111078c1298d02a53a55d886195b6b30c40ddb52e5b060a6cfc991cfe96147280
+  languageName: node
+  linkType: hard
+
 "@tootallnate/once@npm:2":
   version: 2.0.0
   resolution: "@tootallnate/once@npm:2.0.0"
@@ -6217,6 +6231,7 @@ __metadata:
     "@radix-ui/react-icons": "npm:1.3.2"
     "@radix-ui/themes": "npm:3.2.1"
     "@tailwindcss/vite": "npm:4.1.17"
+    "@thenick775/mgba-wasm": "patch:@thenick775/mgba-wasm@npm%3A2.3.4#~/.yarn/patches/@thenick775-mgba-wasm-npm-2.3.4-5c7024b17d.patch"
     "@types/debug": "npm:4.1.12"
     "@types/electron-squirrel-startup": "npm:1.0.2"
     "@types/fs-extra": "npm:11.0.4"
@@ -6246,7 +6261,6 @@ __metadata:
     vite: "npm:7.2.4"
   peerDependencies:
     "@neoframe/electron-window-corner-addon": 0.1.4
-    "@thenick775/mgba-wasm": 2.3.4
   languageName: unknown
   linkType: soft
 

@@ -22,7 +22,7 @@ const ConstrainedView = ({
         height: `calc(100vh - ${bottomBarHeight}px)`,
       }}
     >
-      <div className="px-2">
+      <div className="px-2 min-h-full flex flex-col">
         { children }
       </div>
     </ScrollArea>

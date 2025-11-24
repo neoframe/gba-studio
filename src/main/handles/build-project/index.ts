@@ -218,19 +218,21 @@ async function buildProject (
 
   const projectSettings = getBuildConfiguration(storage, build);
 
-  const [command, ...args] = (
-    projectSettings?.emulatorCommand || 'open -a mGBA'
-  ).split(
-    // Take spaces in folders into account
-    /\s+(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/gm
-  );
+  if (projectSettings?.emulatorType === 'external') {
+    const [command, ...args] = (
+      projectSettings?.emulatorCommand || 'open -a mGBA'
+    ).split(
+      // Take spaces in folders into account
+      /\s+(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/gm
+    );
 
-  const runner = spawn(command, [
-    ...args,
-    finalGamePath,
-  ], { stdio: 'inherit', shell: true });
+    const runner = spawn(command, [
+      ...args,
+      finalGamePath,
+    ], { stdio: 'inherit', shell: true });
 
-  runner.unref();
+    runner.unref();
+  }
 }
 
 async function startBuild (

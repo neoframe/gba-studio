@@ -150,9 +150,8 @@ export interface ProjectSceneData {
 }
 
 export interface ProjectSettings {
-  gitPath?: string;
   pythonPath?: string;
-  gppPath?: string;
+  emulatorType?: 'internal' | 'external';
   emulatorCommand?: string;
 }
 
