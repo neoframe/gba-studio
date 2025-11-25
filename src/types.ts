@@ -212,6 +212,7 @@ export type EventValue =
 
 export interface SceneEvent {
   type: string;
+  enabled?: boolean;
   name?: string;
   // Internals
   id: string;

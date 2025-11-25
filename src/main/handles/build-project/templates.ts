@@ -23,6 +23,8 @@ export const setupHandlebars = async () => {
   Handlebars.registerHelper('gte', (a, b) => a >= b);
   Handlebars.registerHelper('lte', (a, b) => a <= b);
   Handlebars.registerHelper('ne', (a, b) => a !== b);
+  Handlebars.registerHelper('not', (a, b) => a !== b);
+  Handlebars.registerHelper('neq', (a, b) => a !== b);
   Handlebars.registerHelper('isset', v => !!v);
   Handlebars.registerHelper('multiply', (a, b) => a * b);
   Handlebars.registerHelper('or', (a, b) => a || b);

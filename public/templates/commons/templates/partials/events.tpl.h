@@ -1,4 +1,5 @@
 {{#each events}}
+{{#if (neq this.enabled false)}}
 {{#if (eq this.type "wait")}}
 {{>valuePartial prefix=(concat ../prefix "_" @index "_duration") value=this.duration}}
 neo::types::wait_event {{../prefix}}_{{@index}}("wait", &{{../prefix}}_{{@index}}_duration_value);
@@ -136,5 +137,8 @@ neo::types::move_camera_to_event {{../prefix}}_{{@index}}(
 );
 {{else}}
 neo::types::event {{../prefix}}_{{@index}}("{{this.type}}");
+{{/if}}
+{{else}}
+neo::types::event {{../prefix}}_{{@index}}("{{this.type}}:disabled");
 {{/if}}
 {{/each}}

@@ -86,7 +86,9 @@ const Event = ({
     getEventDefinition(event.type)
   ), [event.type]);
 
-  const toggle = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+  const onToggleCollapsibleClick = useCallback((
+    e: MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -94,6 +96,12 @@ const Event = ({
     event._collapsed = !opened;
     onValueChange?.(event);
   }, [opened, event, onValueChange]);
+
+  const onToggleEventClick = useCallback((e: MouseEvent) => {
+    e.stopPropagation();
+    event.enabled = !(event.enabled ?? true);
+    onValueChange?.(event);
+  }, [event, onValueChange]);
 
   const onDeleteClick = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -165,7 +173,12 @@ const Event = ({
 
   return (
     <div
-      className="bg-(--gray-2) flex flex-col"
+      className={classNames(
+        'bg-(--gray-2) flex flex-col',
+        {
+          'bg-(--gray-5)': event.enabled === false,
+        }
+      )}
       ref={setNodeRef}
       style={{
         transform: `translate3d(${transform?.x || 0}px, ` +
@@ -198,6 +211,7 @@ const Event = ({
                   'outline-(--accent-9) rounded-xs'
                 ]: renaming,
                 'overflow-hidden text-ellipsis flex-none': !renaming,
+                'line-through': event.enabled === false && !renaming,
               }
             )}
             contentEditable={renaming}
@@ -212,7 +226,7 @@ const Event = ({
             variant="ghost"
             size="1"
             className="flex-none"
-            onClick={toggle}
+            onClick={onToggleCollapsibleClick}
           >
             { opened ? <CaretDownIcon /> : <CaretRightIcon /> }
           </IconButton>
@@ -227,6 +241,9 @@ const Event = ({
             <DropdownMenu.Content align="end">
               <DropdownMenu.Item onClick={onRenameClick}>
                 Rename event
+              </DropdownMenu.Item>
+              <DropdownMenu.Item onClick={onToggleEventClick}>
+                { event.enabled !== false ? 'Disable event' : 'Enable event' }
               </DropdownMenu.Item>
               <DropdownMenu.Separator />
               <DropdownMenu.Item onClick={onCopyClick}>
