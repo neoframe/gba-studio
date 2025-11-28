@@ -73,6 +73,7 @@ const config: ForgeConfig = {
       name: 'GBAStudio',
       exe: 'gba-studio.exe',
       setupIcon: './images/icon.ico',
+      skipUpdateIcon: true,
     }),
     new MakerZIP({}, ['darwin', 'win32', 'linux']),
     new MakerRpm({
