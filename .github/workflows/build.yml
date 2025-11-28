@@ -18,7 +18,7 @@ jobs:
             os: macos-26
           - name: macOS Intel
             label: darwin-x64
-            os: macos-15-large
+            os: macos-26
     name: Build ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     steps:
