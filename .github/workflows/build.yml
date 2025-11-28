@@ -97,6 +97,7 @@ jobs:
       - name: Run build (Windows 64-bit)
         if: matrix.label == 'win-x64'
         run: |
+          sudo dpkg --add-architecture i386
           sudo apt-get -y update
           sudo apt-get -y install wine64 mono-devel
           export PATH=$PATH:/usr/lib/wine
