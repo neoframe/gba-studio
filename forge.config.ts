@@ -17,7 +17,12 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     icon: process.platform === 'darwin'
-      ? ['./images/AppIcon.icns', './images/AppIcon.icon']
+      ? [
+        './images/AppIcon.icns',
+        ...process.arch === 'arm64'
+          ? ['./images/AppIcon.icon']
+          : [],
+      ]
       : './images/AppIcon',
     appBundleId: 'dev.gbastudio.app',
     name: 'GBAStudio',
